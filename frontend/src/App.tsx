@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import Hologram from './components/Hologram';
 import { useTTS } from './hooks/useTTS';
+import MatrixRain from './components/MatrixRain';
 
 function App() {
   const [botMessage, setBotMessage] = useState('');
@@ -15,7 +15,7 @@ function App() {
 
   // Speak the intro message on load
   useEffect(() => {
-    const introText = "Welcome, seeker of knowledge. I am Akasha. Ask and you shall receive wisdom.";
+    const introText = "Welcome. I am KnowMI, your guide to wisdom. How may I illuminate your path?";
     setBotMessage(introText);
     if (isTtsEnabled) {
       // A slight delay to allow voices to load
@@ -82,17 +82,16 @@ function App() {
 
   return (
     <div className="app-container">
+      <MatrixRain />
       <header className="app-header">
-        <h1 className="app-title">Akasha</h1>
+        <h1 className="app-title">KnowMI.AI</h1>
         <div className="tts-toggle" onClick={toggleTts} title="Toggle Text-to-Speech">
           {isTtsEnabled ? '🔊' : '🔇'}
         </div>
       </header>
       
       <main className="main-content">
-        <div className="hologram-wrapper">
-          <Hologram />
-        </div>
+
         <div className="caption-wrapper">
           <p className="caption-text">{botMessage || (isLoading ? '...' : '')}</p>
         </div>

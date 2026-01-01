@@ -1,9 +1,8 @@
 {
-  "name": "akasha",
+  "name": "knowmi-ai",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://<YOUR_GITHUB_USERNAME>.github.io/<YOUR_REPOSITORY_NAME>",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -13,10 +12,8 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@types/three": "^0.182.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "three": "^0.182.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

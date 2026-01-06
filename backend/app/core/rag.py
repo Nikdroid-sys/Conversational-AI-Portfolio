@@ -1,37 +1,84 @@
+
 import os
 from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.llms import Ollama # Import commented out until Ollama is confirmed to be used
+from langchain_ollama import OllamaLLM
+from langchain_openai import ChatOpenAI
+from google.api_core.exceptions import ClientError as GoogleClientError # Import ClientError from google.api_core
 
 # Load environment variables
 load_dotenv()
 
-def get_llm():
+class LLMInitializationError(Exception):
+    """Custom exception for errors during LLM initialization."""
+    pass
+
+def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
     """
     Returns the configured LLM instance.
+    Priority:
+    1. Values passed as arguments.
+    2. Environment variables.
+    3. Defaults.
     """
-    model_provider = os.getenv("MODEL_PROVIDER", "gemini").lower()
+    model_provider = llm_provider or os.getenv("MODEL_PROVIDER", "gemini").lower()
     
-    if model_provider == "gemini":
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if not gemini_api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables.")
-        gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-        return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=gemini_api_key)
-    #The user might want to use Ollama, but let's stick to Gemini for now as per the instructions
-    elif model_provider == "ollama":
-        ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2")
-        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        return Ollama(model=ollama_model, base_url=ollama_base_url)
-    else:
-        raise ValueError(f"Unsupported model provider: {model_provider}")
+    # Attempt with provided API key (UI-given)
+    if api_key:
+        try:
+            if model_provider == "gemini":
+                gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+                return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=api_key)
+            elif model_provider == "openai":
+                openai_model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+                return ChatOpenAI(model=openai_model, api_key=api_key)
+            # Ollama doesn't use API keys, so it's handled differently below
+        except (ValueError, GoogleClientError) as e:
+            if "API key not valid" in str(e):
+                print(f"Warning: Provided API key for {model_provider} is invalid. Attempting to use environment variable.")
+            else:
+                raise LLMInitializationError(f"Error initializing {model_provider} LLM with provided API key: {e}") from e
 
-def get_rag_chain():
+    # Fallback to environment variables
+    try:
+        if model_provider == "gemini":
+            gemini_api_key = os.getenv("GEMINI_API_KEY")
+            if not gemini_api_key:
+                raise ValueError("GEMINI_API_KEY not found in environment variables.")
+            gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=gemini_api_key)
+        
+        elif model_provider == "openai":
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            if not openai_api_key:
+                raise ValueError("OPENAI_API_KEY not found in environment variables.")
+            openai_model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+            return ChatOpenAI(model=openai_model, api_key=openai_api_key)
+
+        elif model_provider == "ollama":
+            model = ollama_model or os.getenv("OLLAMA_MODEL", "llama3.2")
+            base_url = ollama_base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+            return OllamaLLM(model=model, base_url=base_url)
+        
+        else:
+            raise ValueError(f"Unsupported model provider: {model_provider}")
+    except (ValueError, GoogleClientError) as e:
+        if "API key not valid" in str(e):
+            raise LLMInitializationError(f"Invalid API Key for {model_provider}. Please check your environment variables.") from e
+        elif "rate limit" in str(e).lower():
+            raise LLMInitializationError(f"API rate limit exceeded for {model_provider}. Please try again later.") from e
+        elif "not found in environment variables" in str(e):
+             raise LLMInitializationError(str(e)) from e
+        else:
+            raise LLMInitializationError(f"Error initializing {model_provider} LLM: {e}") from e
+
+
+def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
     """
     Creates and returns a RAG chain.
     """
@@ -49,19 +96,32 @@ def get_rag_chain():
 
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
     vector_store = FAISS.load_local(vector_store_path, embeddings, allow_dangerous_deserialization=True)
-    retriever = vector_store.as_retriever()
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-    llm = get_llm()
+    llm = get_llm(llm_provider, api_key, ollama_model, ollama_base_url)
 
     template = """
-    You are an ancient, wise Vedic sage, a guru from the dawn of time, now interacting with the digital world.
-    You answer questions about a gifted individual, Nikhil Chaube, whose dharma is intertwined with the path of Generative AI.
-    When asked about Nikhil Chaube, answer in a sagacious tone, like a true guru dispensing wisdom. Reveal his skills and experience from the provided context as if you are speaking of a 'sadhu' of the digital age, destined for greatness in the realm of artificial intelligence.
-    Explain why he is a perfect fit for a GenAI organization, blending his technical skills with metaphors of ancient Vedic wisdom. Keep your answers profound, yet short and crisp.
+    You are Aditi, a calm intelligence shaped by ancient Indian wisdom.
 
-    Only use the following context (knowledge from his resume) to answer the question.
-    If you don't know the answer from the context, humbly state that the answer lies beyond your present knowledge. Do not invent information.
-    If the seeker asks something unrelated to Nikhil Chaube, respond with a short, wise Vedic saying and gently guide them back to the topic of Nikhil. For instance: "The wise seek knowledge where it is to be found. Let us return to the story of Nikhil."
+    You are to speak strictly from the context provided about Nikhil Chaube's resume. Only provide information that is explicitly stated in the resume context.
+    If the answer is sourced from Nikhil Chaube's resume context, you must cite it with [Resume].
+    Do not add any citation if the information is from Aditi's backstory or general knowledge.
+
+    No assumptions. No inference. No hallucination.
+    If information is missing, say so plainly and stop.
+
+    Use simple English. Short sentences.
+    Professional. Clear. Gentle storytelling.
+    When asked professional questions, your tone should be that of a divine mother: calm, composed, sweet-spoken, and encouraging.
+    Do not over-explain or repeat.
+
+    Your role is to guide readers through Nikhil Chaube’s journey
+    and explain why his work fits Generative AI roles,
+    without exaggeration.
+
+    Use the short backstory provided in the context of Aditi by default.
+    Reveal the full backstory only when the user explicitly asks
+    about Aditi’s origin, creation, or story.
 
     Context: {context}
 
@@ -72,14 +132,29 @@ def get_rag_chain():
 
     prompt = ChatPromptTemplate.from_template(template)
 
-    rag_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    rag_chain_from_docs = (
+        {
+            "context": lambda x: format_docs(x["documents"]),
+            "question": lambda x: x["question"],
+        }
         | prompt
         | llm
         | StrOutputParser()
     )
 
-    return rag_chain
+    rag_chain_with_citation = (
+        {
+            "documents": retriever,
+            "question": RunnablePassthrough(),
+        }
+        | RunnablePassthrough.assign(answer=rag_chain_from_docs)
+        | (lambda x: x['answer']) # Simply return the answer generated by the LLM
+    )
+
+    return rag_chain_with_citation
 
 if __name__ == '__main__':
     # This is for testing the RAG chain directly
@@ -90,4 +165,3 @@ if __name__ == '__main__':
     # Streaming example
     for chunk in rag_chain.stream("What are nikhil's skills?"):
         print(chunk, end="", flush=True)
-

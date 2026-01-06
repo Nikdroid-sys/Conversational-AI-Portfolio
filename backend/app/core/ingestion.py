@@ -1,71 +1,99 @@
+
 import os
-import glob
-from dotenv import load_dotenv
-from langchain_community.document_loaders import UnstructuredMarkdownLoader, PyPDFLoader, Docx2txtLoader, TextLoader
+import hashlib
+from langchain_community.document_loaders import DirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
+def get_project_root():
+    """Returns the project root directory."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+def get_vector_store_path():
+    """Returns the path to the vector store."""
+    project_root = get_project_root()
+    vector_store_dir_name = os.getenv("VECTOR_STORE_PATH", "db")
+    return os.path.join(project_root, vector_store_dir_name)
+
+def get_data_hash_path():
+    """Returns the path to the data hash file."""
+    return os.path.join(get_vector_store_path(), "data.hash")
+
+def calculate_data_hash():
+    """Calculates a hash of the data directory's contents."""
+    project_root = get_project_root()
+    data_dir = os.path.join(project_root, 'data')
+    hasher = hashlib.md5()
+    
+    if not os.path.exists(data_dir):
+        return hasher.hexdigest()
+
+    for root, _, files in os.walk(data_dir):
+        for file in sorted(files):
+            if file.endswith('.md'):
+                path = os.path.join(root, file)
+                hasher.update(file.encode())
+                hasher.update(str(os.path.getmtime(path)).encode())
+    return hasher.hexdigest()
+
 def ingest_data():
     """
-    Ingests data from the data source, processes it, and stores it in a vector store.
+    Ingests data from the data directory if changes are detected.
     """
-    # Determine the project root dynamically
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.join(current_dir, '..', '..', '..')
+    vector_store_path = get_vector_store_path()
+    data_hash_path = get_data_hash_path()
+    
+    new_hash = calculate_data_hash()
+    
+    old_hash = None
+    if os.path.exists(data_hash_path):
+        with open(data_hash_path, 'r') as f:
+            old_hash = f.read()
 
-    data_dir_name = os.getenv("DATA_PATH", "data")
-    data_path = os.path.join(project_root, data_dir_name)
-
-    if not os.path.exists(data_path):
-        print(f"Error: Data directory not found at {data_path}")
+    if new_hash == old_hash and os.path.exists(vector_store_path):
+        print("No changes in data directory. Ingestion skipped.")
         return
-
-    all_documents = []
-    supported_extensions = {
-        ".md": UnstructuredMarkdownLoader,
-        ".pdf": PyPDFLoader,
-        ".docx": Docx2txtLoader,
-        ".txt": TextLoader,
-    }
-
-    print(f"Loading data from {data_path}...")
-    for ext, Loader in supported_extensions.items():
-        for file_path in glob.glob(os.path.join(data_path, f"*{ext}")):
-            print(f"  Loading {file_path} using {Loader.__name__}")
-            try:
-                loader = Loader(file_path)
-                all_documents.extend(loader.load())
-            except Exception as e:
-                print(f"  Error loading {file_path}: {e}")
-
-    if not all_documents:
-        print(f"No documents found or loaded from {data_path} with supported extensions.")
-        return
-
-    print(f"Loaded {len(all_documents)} document(s).")
-
-    print("Splitting documents into chunks...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    texts = text_splitter.split_documents(all_documents)
-    print(f"Split documents into {len(texts)} chunks.")
-
-    print("Creating embeddings. This may take a moment...")
+        
+    print("Changes detected in data directory. Performing full re-ingestion.")
+    
+    project_root = get_project_root()
+    data_dir = os.path.join(project_root, 'data')
     embedding_model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-    embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
 
-    print("Creating vector store...")
-    vector_store_path = os.path.join(project_root, os.getenv("VECTOR_STORE_PATH", "db"))
+    if not os.path.exists(data_dir) or not any(f.endswith('.md') for f in os.listdir(data_dir)):
+        if os.path.exists(vector_store_path):
+            import shutil
+            shutil.rmtree(vector_store_path)
+        print("No markdown files to ingest. Vector store cleared.")
+        os.makedirs(vector_store_path, exist_ok=True) # create db dir
+        with open(data_hash_path, 'w') as f:
+            f.write(new_hash)
+        return
+
+    loader = DirectoryLoader(data_dir, glob="**/*.md", show_progress=True)
+    documents = loader.load()
+
+    for doc in documents:
+        # Extract the filename from the full path
+        source_filename = os.path.basename(doc.metadata['source'])
+        doc.metadata['source'] = source_filename
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=200)
+    texts = text_splitter.split_documents(documents)
     
-    # Ensure the directory for the vector store exists
-    os.makedirs(vector_store_path, exist_ok=True)
-    
+    embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
     vector_store = FAISS.from_documents(texts, embeddings)
     vector_store.save_local(vector_store_path)
-    print(f"Vector store created and saved at {vector_store_path}")
+    
+    with open(data_hash_path, 'w') as f:
+        f.write(new_hash)
+        
+    print("Full re-ingestion complete.")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ingest_data()

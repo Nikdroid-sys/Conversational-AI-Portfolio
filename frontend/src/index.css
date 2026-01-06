@@ -1,31 +1,396 @@
+
 :root {
-  font-family: 'Source Code Pro', monospace;
-  line-height: 1.5;
-  font-weight: 400;
+  --glass-white: rgba(255, 255, 255, 0.2); /* Translucent white for glassmorphism */
+}
 
-  color-scheme: dark;
-  color: #d1d5db;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Basic CSS Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  min-height: 100vh;
-  background-color: #000;
+  font-family: 'Inter', sans-serif; /* Global font change to Inter */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+  background-image: url('./assets/images/background.jfif');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  backdrop-filter: none; /* Ensure no blur on initial body background */
+  -webkit-backdrop-filter: none;
+  font-size: 16px; /* Base font size */
+  line-height: 1.6; /* Improved readability */
 }
 
 #root {
+  height: 100%;
   width: 100%;
-  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-page-container {
+  display: flex;
+  flex-direction: row;
+  height: 80vh; /* Reduced height */
+  width: 80vw;  /* Reduced width */
+  max-width: 1000px; /* Reduced max-width */
+  padding: 20px;
+  transition: filter 0.5s ease-out;
+}
+
+.icons-bar {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 15px;
+  padding: 10px;
+  background: var(--glass-white); /* Use new glass-white variable */
+  backdrop-filter: blur(15px) saturate(180%) brightness(1.1); /* Enhanced frosted glass effect */
+  -webkit-backdrop-filter: blur(15px) saturate(180%) brightness(1.1);
+  border-radius: 15px; /* Slightly less rounded */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Stronger border for definition */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Depth effect */
+  height: fit-content;
+  transition: all 0.3s ease-in-out; /* Smooth transitions for jelly-like effect */
 }
+
+.icons-bar .icon-button:hover {
+  transform: translateY(-5px); /* Subtle lift on hover */
+  box-shadow: 0 6px 40px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+  margin-left: 20px;
+}
+
+.chat-area-wrapper {
+  flex-grow: 1;
+  background: var(--glass-white); /* Use new glass-white variable */
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.2); /* Enhanced frosted glass effect */
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.2);
+  border-radius: 15px; /* Consistent with icons bar */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Stronger border for definition */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Depth effect */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.chat-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-right: 10px; /* for scrollbar */
+}
+
+/* Custom Scrollbar */
+.chat-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.chat-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.chat-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.message {
+  padding: 12px 20px;
+  border-radius: 18px;
+  max-width: 80%;
+  animation: fade-in-message 0.5s ease-out forwards;
+  color: #fff;
+  font-size: 1rem; /* Consistent font size */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Enhance text readability */
+}
+
+@keyframes fade-in-message {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.aditi-message {
+  background: rgba(255, 255, 255, 0.3); /* Translucent white, no blue */
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.4); /* Stronger translucent border */
+  border-radius: 20px; /* Slightly more rounded */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle depth */
+  backdrop-filter: blur(5px); /* Subtle blur for glass effect */
+  -webkit-backdrop-filter: blur(5px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Enhance text readability */
+  font-size: 1rem; /* Consistent font size */
+}
+
+.user-message {
+  background: rgba(255, 255, 255, 0.4); /* Translucent white, no blue, slightly more opaque */
+  align-self: flex-end;
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Stronger translucent border */
+  border-radius: 20px; /* Slightly more rounded */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle depth */
+  backdrop-filter: blur(5px); /* Subtle blur for glass effect */
+  -webkit-backdrop-filter: blur(5px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Enhance text readability */
+  font-size: 1rem; /* Consistent font size */
+}
+
+.loading-indicator {
+  align-self: flex-start;
+  padding: 12px 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.message-form {
+  display: flex;
+  width: 60%; /* Consistent width */
+  max-width: 800px; /* Consistent max-width for responsiveness */
+  height: 50px; /* Consistent height */
+  border-radius: 30px; /* Softer, more pill-like */
+  background: var(--glass-white); /* Use new glass-white variable */
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.2); /* Enhanced frosted glass effect */
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.4); /* Stronger border for definition */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Depth effect */
+  padding: 0 20px; /* Consistent padding */
+  margin: 0 auto; /* Center the form */
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  transition: all 0.3s ease-in-out; /* Smooth transitions for jelly-like effect */
+}
+
+.message-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff; /* Visible text - white */
+  font-size: 1rem;
+  padding: 0 10px;
+  font-family: 'Inter', sans-serif; /* Use new global font */
+}
+
+.message-input::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Visible placeholder - white */
+}
+
+.icon-button {
+  background: var(--glass-white); /* Use new glass-white variable */
+  backdrop-filter: blur(15px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(15px) saturate(180%) brightness(1.1);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8); /* Softer white */
+  width: 45px; /* Slightly larger */
+  height: 45px; /* Slightly larger */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem; /* Larger icon */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transitions */
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle depth */
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+  transform: translateY(-2px); /* Subtle lift */
+}
+
+.welcome-message-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 300;
+    max-width: 80%;
+    transition: opacity 0.5s ease-out;
+}
+
+.resume-link {
+    color: #87CEEB; /* SkyBlue */
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.resume-link:hover {
+    color: #b8e2f2;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px; /* Smaller base font size for mobile */
+  }
+
+  .chat-page-container {
+    flex-direction: column;
+    padding: 10px;
+    height: 95vh; /* Adjust height for mobile */
+    width: 95vw; /* Adjust width for mobile */
+  }
+
+  .icons-bar {
+    flex-direction: row;
+    height: auto;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
+    padding: 8px; /* Adjusted padding */
+  }
+
+  .chat-container {
+    margin-left: 0;
+    padding: 0;
+    flex-grow: 1;
+  }
+
+  .chat-area-wrapper {
+    padding: 10px; /* Adjusted padding */
+  }
+
+  .message {
+    max-width: 95%; /* Adjust max-width for mobile messages */
+    font-size: 0.9rem; /* Smaller font size for messages */
+  }
+
+  .message-form {
+    width: 90%; /* Adjust width for mobile input */
+    height: 45px; /* Adjust height for mobile input */
+    padding: 0 15px; /* Adjusted padding */
+    bottom: 20px; /* Adjust position */
+  }
+
+  .message-input {
+    font-size: 0.9rem; /* Smaller font size for input */
+  }
+
+  .icon-button {
+    width: 40px; /* Adjust size for mobile buttons */
+    height: 40px;
+    font-size: 1.2rem; /* Adjust icon size */
+  }
+
+  .welcome-streaming-text h1 {
+    font-size: 1.8em; /* Adjust welcome message font size */
+  }
+
+  .welcome-streaming-text p {
+    font-size: 0.8em; /* Adjust welcome sub-phrase font size */
+  }
+}
+
+/* New styles for the initial welcome screen in ChatUI.js */
+.welcome-initial-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes input to bottom */
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  position: fixed; /* Fixed position to cover the entire screen */
+  top: 0;
+  left: 0;
+  z-index: 10; /* Ensure it's above other elements if any */
+  color: white;
+  font-family: 'Open Sans', sans-serif; /* Use new global font */
+  padding: 20px;
+}
+
+.welcome-streaming-text {
+  flex-grow: 1; /* Allows text to take available space */
+  display: flex;
+  flex-direction: column; /* Allow stacking of Hi Aditi and sub-phrase */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  max-width: 600px; /* Consistent with input bar */
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif; /* Consistent font */
+  
+  /* Remove Glassy finish with border, use text-shadow */
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 50px; /* Space between welcome message and input bar (increased for lower position) */
+}
+
+.welcome-streaming-text h1 {
+    font-size: 2.2em; /* Adjusted size */
+    font-weight: bold;
+    margin-bottom: 5px; /* Space between big and sub-phrase */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); /* Enhanced shadow for readability */
+}
+
+.welcome-streaming-text p {
+    font-size: 0.9em; /* Adjusted size */
+    opacity: 0.8;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); /* Enhanced shadow for readability */
+}
+
+/* Reusing .message-form but with specific styles for initial input */
+.message-form.welcome-input-form {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%; /* Consistent width */
+  max-width: 800px; /* Consistent max-width for responsiveness */
+  height: 50px; /* Consistent height */
+  border-radius: 25px; /* Consistent border-radius */
+  margin-bottom: 20px; /* Space from bottom (consistent with chat input) */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0 20px; /* Consistent padding */
+  z-index: 100;
+}
+
+
+/* @keyframes pulse-glow removed */

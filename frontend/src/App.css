@@ -38,11 +38,11 @@ body {
 
 .welcome-message {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-  /* backdrop-filter: blur(2px); /* Reduced blur */
-  /* -webkit-backdrop-filter: blur(2px); */
+  backdrop-filter: blur(1px); /* Very subtle blur for enhanced glass effect */
+  -webkit-backdrop-filter: blur(1px);
   border-radius: 20px;
-  border:1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* More subtle shadow */
+  border:1px solid rgba(255, 255, 255, 0.3); /* Slightly more opaque border */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer, more ethereal shadow */
   padding: 2.5rem 3.5rem; /* Increased padding */
   text-align: center;
   transition: all 0.5s ease-out; /* Fluid transition */
@@ -136,12 +136,14 @@ body {
   padding: 1rem 4rem 1rem 1.5rem;
   border-radius: 25px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.15); /* Slightly darker background */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%); /* More pronounced gradient */
+  backdrop-filter: blur(1px); /* Subtle blur for glass effect */
+  -webkit-backdrop-filter: blur(1px);
   color: white;
   font-size: 1rem;
   outline: none;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1); /* Stronger, more reflective shadow */
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for input text */
 }
 

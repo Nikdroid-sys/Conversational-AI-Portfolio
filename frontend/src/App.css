@@ -108,7 +108,7 @@ body {
   background: rgba(255, 255, 255, 0.15);
   align-self: flex-end;
   text-align: right;
-  max-width: fit-content;
+  max-width: 80%; /* Adjusted max-width for better wrapping */
 }
 
 .chat-message.bot {

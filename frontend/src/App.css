@@ -1,137 +1,178 @@
-.app-container {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevent scrolling on the html/body */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: white;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.App {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
-  text-align: center;
-  overflow: hidden;
-  background-color: #000;
-}
-
-.app-header {
-  width: 100%;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10;
-  box-sizing: border-box;
-}
-
-.app-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  color: #00ff00; /* Matrix Green */
-  text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
-}
-
-.tts-toggle {
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.tts-toggle:hover {
-  transform: scale(1.1);
+  justify-content: center;
+  height: 100%; /* Use 100% height for the App container */
+  width: 100vw;
+  background: url('./assets/background.jfif') no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed; /* Keep background fixed */
+  text-align: center;
+  position: relative;
 }
 
 .main-content {
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 1rem;
+  padding-bottom: 80px; /* Adjust for footer height */
   box-sizing: border-box;
 }
 
-.caption-wrapper {
-  width: 100%;
-  max-width: 48rem;
-  height: auto; /* Auto height */
-  min-height: 100px;
-  padding: 2rem;
-  box-sizing: border-box;
+.welcome-message {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  /* backdrop-filter: blur(2px); /* Reduced blur */
+  /* -webkit-backdrop-filter: blur(2px); */
+  border-radius: 20px;
+  border:1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* More subtle shadow */
+  padding: 2.5rem 3.5rem; /* Increased padding */
+  text-align: center;
+}
+
+.welcome-message h1 {
+  font-size: 3.5rem; /* Slightly larger font */
+  margin: 0 0 0.5rem 0; /* Added bottom margin */
+  font-family: 'Inter', sans-serif;
+  font-weight: 700; /* Bolder for prominence */
+}
+
+.welcome-message p {
+  font-size: 1.3rem; /* Slightly larger font */
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  opacity: 0.8; /* Slightly less opaque */
+}
+
+.chat-container {
+  width: 70%;
+  max-width: 700px;
+  height: calc(100vh - 180px); /* Adjusted height to account for header/footer */
+  overflow-y: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar */
+.chat-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.chat-message {
+  padding: 0.8rem 1.2rem;
+  border-radius: 25px;
+  max-width: 65%;
+  word-wrap: break-word;
+  font-size: 1rem;
+}
+
+.chat-message.user {
+  background: rgba(255, 255, 255, 0.15);
+  align-self: flex-end;
+  text-align: right;
+  max-width: fit-content;
+}
+
+.chat-message.bot {
+  background: rgba(0, 0, 0, 0.15);
+  align-self: flex-start;
+  text-align: left;
+}
+
+.footer {
+  width: 100%;
+  padding: 1rem 0;
+  position: absolute; /* Changed to absolute to be relative to .App */
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2); /* Slightly darker background for footer */
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  border-radius: 10px;
-  border: 1px solid rgba(0, 255, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.caption-text {
-  font-size: 1.5rem;
-  color: #00ff00; /* Matrix Green */
-  font-family: 'monospace';
-  font-weight: 500;
-  line-height: 1.6;
-  text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-  white-space: pre-wrap;
-}
-
-.footer-content {
-  width: 100%;
-  padding: 2rem 0;
-  display: flex;
-  justify-content: center;
-}
-
-.chat-input-area {
+.input-bar {
+  width: 50%;
+  max-width: 600px; /* Added max-width for consistency */
+  margin: 0 auto;
+  position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 48rem;
-  background-color: transparent;
-  border-bottom: 1px solid rgba(0, 255, 0, 0.4);
-  padding: 0.5rem 0;
-  z-index: 5;
 }
 
-.chat-input-area input {
-  flex-grow: 1;
-  padding: 0.75rem 0;
-  border: none;
-  background-color: transparent;
-  color: #e5e7eb;
-  font-size: 1.1rem;
-  font-family: 'monospace';
+.input-bar input {
+  flex-grow: 1; /* Allow input to fill available space */
+  padding: 1rem 4rem 1rem 1.5rem;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(0px); /* Slightly more blur for input */
+  color: white;
+  font-size: 1rem;
   outline: none;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.chat-input-area input::placeholder {
-  color: #00ff00;
-  opacity: 0.6;
+.input-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Inter', sans-serif;
 }
 
-.chat-input-area button {
-  padding: 0.5rem;
-  margin-left: 0.75rem;
+.input-bar button {
+  position: absolute;
+  right: 0.8rem; /* Adjusted right position */
+  top: 50%;
+  transform: translateY(-50%);
+  background: #007bff; /* Solid blue background for button */
   border: none;
-  border-radius: 50%;
-  background-color: rgba(0, 255, 0, 0.2);
-  color: #00ff00;
-  cursor: pointer;
+  border-radius: 50%; /* Make it round */
+  width: 38px; /* Fixed size */
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s ease;
 }
 
-.chat-input-area button:hover {
-  background-color: rgba(0, 255, 0, 0.4);
+.input-bar button:hover {
+  background: #0056b3; /* Slightly darker blue on hover */
 }
 
-.chat-input-area button:disabled {
-  background-color: #4b5563;
-  cursor: not-allowed;
-  opacity: 0.5;
+.input-bar button svg {
+  fill: white; /* Ensure icon is white */
+  width: 20px;
+  height: 20px;
 }

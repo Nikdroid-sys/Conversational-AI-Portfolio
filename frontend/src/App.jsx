@@ -14,10 +14,10 @@ function App() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
-    const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
-    const [showSettings, setShowSettings] = useState(false);
-    const [showAbout, setShowAbout] = useState(false);
+      const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
+      const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
+      const [currentMessageIndex, setCurrentMessageIndex] = useState(-1); // Tracks the index of the message currently being streamed, -1 means no message is streaming.
+      const [showSettings, setShowSettings] = useState(false);    const [showAbout, setShowAbout] = useState(false);
   
     const [geminiApiKey, setGeminiApiKey] = useState('');
     const [openaiApiKey, setOpenaiApiKey] = useState('');
@@ -28,9 +28,14 @@ function App() {
       if (input.trim() === '') return;
   
       const userMessage = { text: input, sender: 'user' };
-      setMessages(prevMessages => [...prevMessages, userMessage]); // Add user's message
-      setInput('');
-      setIsTyping(true);
+          // Optimistically add user's message and a placeholder for bot's message
+          setMessages(prevMessages => {
+            const newMessagesArray = [...prevMessages, userMessage, { text: '', sender: 'bot' }];
+            setCurrentMessageIndex(newMessagesArray.length - 1); // Index of the new bot message
+            return newMessagesArray;
+          });
+      
+          setInput('');      setIsTyping(true);
     let requestBody = {
       query: input,
       llm_provider: llmProvider,
@@ -109,24 +114,27 @@ function App() {
   }, [messages]); // Keep this useEffect for scroll
 
   useEffect(() => {
-    if (fullBotMessage) {
+    if (fullBotMessage && currentMessageIndex !== -1) {
       let i = 0;
-      setStreamingBotMessage(''); // Reset streaming message
       const typingInterval = setInterval(() => {
         if (i < fullBotMessage.length) {
-          setStreamingBotMessage(prev => prev + fullBotMessage.charAt(i));
+          setMessages(prevMessages => {
+            const updatedMessages = [...prevMessages];
+            updatedMessages[currentMessageIndex] = { ...updatedMessages[currentMessageIndex], text: fullBotMessage.substring(0, i + 1) };
+            return updatedMessages;
+          });
           i++;
         } else {
           clearInterval(typingInterval);
-          setMessages(prevMessages => [...prevMessages, { text: fullBotMessage, sender: 'bot' }]);
           setFullBotMessage(''); // Clear fullBotMessage after streaming
+          setCurrentMessageIndex(-1); // Reset index
           setIsTyping(false); // Ensure isTyping is false after streaming completes
         }
       }, 25); // Adjust typing speed here (milliseconds per character)
 
       return () => clearInterval(typingInterval); // Cleanup on unmount or fullBotMessage change
     }
-  }, [fullBotMessage]);
+  }, [fullBotMessage, currentMessageIndex]);
 
   return (
     <div className="App">
@@ -151,14 +159,9 @@ function App() {
                 )}
               </div>
             ))}
-            {isTyping && !fullBotMessage && ( // Show "Aditi is typing..." while waiting for response, but not during streaming
+            {isTyping && currentMessageIndex === -1 && ( // Show "Aditi is typing..." only when actively fetching a response, not during streaming
               <div className="chat-message bot">
                 <p>Aditi is typing...</p>
-              </div>
-            )}
-            {streamingBotMessage && ( // Display the streaming message as a separate chat bubble
-              <div className="chat-message bot">
-                <ReactMarkdown>{streamingBotMessage}</ReactMarkdown>
               </div>
             )}
           </div>

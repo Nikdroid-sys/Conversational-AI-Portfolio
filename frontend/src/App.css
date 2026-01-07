@@ -49,22 +49,22 @@ body {
 }
 
 .welcome-message h1 {
-  font-size: 3.2rem; /* Slightly reduced for less bulk, still impressive */
-  margin: 0 0 0.4rem 0; /* Adjusted margin */
+  font-size: 3.0rem; /* Slightly reduced font size for less bulk */
+  margin: 0 0 0.3rem 0; /* Reduced margin for tighter look */
   font-family: 'Lora', serif;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.8); /* Slightly less aggressive shadow */
-  text-align: left; /* Align h1 to left */
+  text-align: left; /* Keep h1 aligned to left */
   line-height: 1.2;
 }
 
 .welcome-message p {
-  font-size: 1.6rem; /* Slightly reduced for less bulk */
+  font-size: 1.5rem; /* Slightly reduced font size for elegance */
   margin: 0;
-  font-family: 'Lora', serif; /* Elegant font */
+  font-family: 'Lora', serif;
   font-weight: 400; /* Lighter weight for subtitle */
   opacity: 0.9;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6); /* Refined shadow */
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
   line-height: 1.4;
   text-align: left; /* Align p to left */
 }
@@ -140,14 +140,14 @@ body {
   padding: 1rem 4rem 1rem 1.5rem;
   border-radius: 25px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%); /* More pronounced gradient */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%); /* More opaque gradient */
   backdrop-filter: blur(1px); /* Subtle blur for glass effect */
   -webkit-backdrop-filter: blur(1px);
   color: white;
   font-size: 1rem;
   outline: none;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1); /* Stronger, more reflective shadow */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2); /* Stronger, more prominent shadow */
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for input text */
 }
 

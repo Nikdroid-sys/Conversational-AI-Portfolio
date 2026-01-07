@@ -66,7 +66,7 @@ body {
   opacity: 0.9;
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
   line-height: 1.4;
-  text-align: left; /* Align p to left */
+  text-align: right; /* Align p to right */
 }
 
 .chat-container {
@@ -140,21 +140,22 @@ body {
   padding: 1rem 4rem 1rem 1.5rem;
   border-radius: 25px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%); /* More opaque gradient */
-  backdrop-filter: blur(1px); /* Subtle blur for glass effect */
-  -webkit-backdrop-filter: blur(1px);
-  color: white;
-  font-size: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.25) 100%); /* More opaque gradient for depth */
+  backdrop-filter: blur(2px) saturate(150%); /* Slightly more blur and saturation for glassy effect */
+  -webkit-backdrop-filter: blur(2px) saturate(150%);
+  color: #E0E0E0; /* Slightly off-white for better contrast */
+  font-size: 1.05rem; /* Slightly larger font for readability */
   outline: none;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2); /* Stronger, more prominent shadow */
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for input text */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3); /* Stronger shadow for depth */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8); /* Stronger text shadow for visibility */
 }
 
 .input-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.8); /* More opaque placeholder */
+  color: rgba(255, 255, 255, 0.9); /* Even more opaque placeholder */
   font-family: 'Inter', sans-serif;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for placeholder text */
+  font-size: 1.05rem; /* Match input text size */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8); /* Stronger text shadow for visibility */
 }
 
 .input-bar .icon {

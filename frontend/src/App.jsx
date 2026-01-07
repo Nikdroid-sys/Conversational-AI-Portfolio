@@ -145,7 +145,8 @@ function App() {
       <main className="main-content">
         {messages.length === 0 ? (
           <div className="welcome-message">
-            <p>Namaste. Insight awaits—ask about Nikhil Chaube.</p>
+            <h1>Namaste. Insight awaits</h1>
+            <p>—ask about Nikhil Chaube.</p>
           </div>
         ) : (
           <div className="chat-container">

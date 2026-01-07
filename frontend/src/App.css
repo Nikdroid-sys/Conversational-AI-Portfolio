@@ -48,14 +48,25 @@ body {
   transition: all 0.5s ease-out; /* Fluid transition */
 }
 
+.welcome-message h1 {
+  font-size: 3.8rem; /* Big and clear */
+  margin: 0 0 0.5rem 0;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9); /* Stronger shadow */
+  text-align: center; /* Center alignment */
+  line-height: 1.2;
+}
+
 .welcome-message p {
-  font-size: 2.2rem; /* Adjusted size for impressiveness and readability */
+  font-size: 1.8rem; /* A little smaller */
   margin: 0;
   font-family: 'Lora', serif; /* Elegant font */
-  font-weight: 500; /* Medium weight for good presence */
-  opacity: 0.9; /* Slightly less opaque for subtle elegance */
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7); /* Refined shadow for depth */
-  line-height: 1.4; /* Improve readability for multi-line text */
+  font-weight: 500; /* Medium weight */
+  opacity: 0.9;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7); /* Refined shadow */
+  line-height: 1.4;
+  text-align: center; /* Center alignment */
 }
 
 .chat-container {

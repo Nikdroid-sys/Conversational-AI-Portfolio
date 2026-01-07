@@ -45,6 +45,7 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* More subtle shadow */
   padding: 2.5rem 3.5rem; /* Increased padding */
   text-align: center;
+  transition: all 0.5s ease-out; /* Fluid transition */
 }
 
 .welcome-message h1 {
@@ -116,8 +117,8 @@ body {
   position: absolute; /* Changed to absolute to be relative to .App */
   bottom: 0;
   background: rgba(0, 0, 0, 0.2); /* Slightly darker background for footer */
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  /* backdrop-filter: blur(5px); */
+  /* -webkit-backdrop-filter: blur(5px); */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -148,13 +149,11 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-.input-bar button {
+.input-bar .icon {
   position: absolute;
   right: 0.8rem; /* Adjusted right position */
   top: 50%;
   transform: translateY(-50%);
-  background: transparent; /* No background for button */
-  border: none;
   border-radius: 50%; /* Make it round */
   width: 38px; /* Fixed size */
   height: 38px;
@@ -164,10 +163,14 @@ body {
   cursor: pointer;
   padding: 0;
   transition: background 0.3s ease;
+  /* Ensure background and border are consistent with other icons' glass effect but round */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.input-bar button:hover {
-  background: rgba(255, 255, 255, 0.1); /* Slight hover effect if desired, or transparent */
+.input-bar .icon:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
 }
 
 .input-bar button svg {

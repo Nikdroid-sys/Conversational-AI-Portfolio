@@ -1,0 +1,37 @@
+.icons-container {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 100; /* Ensure icons are above other content */
+}
+
+.icon {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  /* backdrop-filter: blur(5px); */
+  /* -webkit-backdrop-filter: blur(5px); */
+  border-radius: 15px; /* Slightly rounded rectangle */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 1rem; /* Adjust padding to make it a bit larger */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between icon and text */
+  cursor: pointer;
+  color: white;
+  font-size: 0.9rem;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.icon:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.icon svg {
+  width: 20px; /* Smaller icon size within the button */
+  height: 20px;
+  fill: currentColor; /* Ensure SVG color matches text */
+}
+

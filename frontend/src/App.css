@@ -136,7 +136,7 @@ body {
   padding: 1rem 4rem 1rem 1.5rem;
   border-radius: 25px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.15); /* Slightly darker background */
   color: white;
   font-size: 1rem;
   outline: none;
@@ -146,7 +146,7 @@ body {
 }
 
 .input-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8); /* More opaque placeholder */
   font-family: 'Inter', sans-serif;
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for placeholder text */
 }

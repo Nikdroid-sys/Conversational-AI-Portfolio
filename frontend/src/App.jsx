@@ -11,35 +11,26 @@ import SettingsIcon from './components/SettingsIcon';
 import AboutIcon from './components/AboutIcon';
 
 function App() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
-  const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(-1); // Tracks the index of the message currently being streamed, -1 means no message is streaming.
-  const [showSettings, setShowSettings] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [openaiApiKey, setOpenaiApiKey] = useState('');
-  const [ollamaUrl, setOllamaUrl] = useState('');
-  const [llmProvider, setLlmProvider] = useState('gemini');
-
-  const handleSend = async () => {
-    if (input.trim() === '') return;
-
-    const userMessage = { text: input, sender: 'user' };
-    
-    // Optimistically add user's message and a placeholder for bot's message
-    setMessages(prevMessages => {
-      const newMessagesArray = [...prevMessages, userMessage, { text: '', sender: 'bot' }];
-      setCurrentMessageIndex(newMessagesArray.length - 1); // Index of the new bot message
-      return newMessagesArray;
-    });
-
-    setInput('');
-    setIsTyping(true);
-
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
+    const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
+    const [showSettings, setShowSettings] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
+  
+    const [geminiApiKey, setGeminiApiKey] = useState('');
+    const [openaiApiKey, setOpenaiApiKey] = useState('');
+    const [ollamaUrl, setOllamaUrl] = useState('');
+    const [llmProvider, setLlmProvider] = useState('gemini');
+  
+    const handleSend = async () => {
+      if (input.trim() === '') return;
+  
+      const userMessage = { text: input, sender: 'user' };
+      setMessages(prevMessages => [...prevMessages, userMessage]); // Add user's message
+      setInput('');
+      setIsTyping(true);
     let requestBody = {
       query: input,
       llm_provider: llmProvider,
@@ -66,7 +57,7 @@ function App() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let accumulatedBotMessage = ''; 
+      let accumulatedBotMessage = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -118,7 +109,7 @@ function App() {
   }, [messages]); // Keep this useEffect for scroll
 
   useEffect(() => {
-    if (fullBotMessage && currentMessageIndex !== -1) {
+    if (fullBotMessage) {
       let i = 0;
       setStreamingBotMessage(''); // Reset streaming message
       const typingInterval = setInterval(() => {
@@ -127,20 +118,15 @@ function App() {
           i++;
         } else {
           clearInterval(typingInterval);
-          // Once streaming is complete, update the final message in the messages array
-          setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            updatedMessages[currentMessageIndex] = { text: fullBotMessage, sender: 'bot' };
-            return updatedMessages;
-          });
-          setCurrentMessageIndex(-1); // Reset index
+          setMessages(prevMessages => [...prevMessages, { text: fullBotMessage, sender: 'bot' }]);
           setFullBotMessage(''); // Clear fullBotMessage after streaming
+          setIsTyping(false); // Ensure isTyping is false after streaming completes
         }
       }, 25); // Adjust typing speed here (milliseconds per character)
 
       return () => clearInterval(typingInterval); // Cleanup on unmount or fullBotMessage change
     }
-  }, [fullBotMessage, currentMessageIndex]);
+  }, [fullBotMessage]);
 
   return (
     <div className="App">
@@ -151,27 +137,28 @@ function App() {
       <main className="main-content">
         {messages.length === 0 ? (
           <div className="welcome-message">
-            <h1>Namaste, I'm Aditi</h1>
-            <p>I take you to the mystical journeys of Nikhil Chaube</p>
+            <h1>Namaste,</h1>
+            <p>A clear view of Nikhil Chaube starts here.</p>
           </div>
         ) : (
           <div className="chat-container">
             {messages.map((msg, index) => (
               <div key={index} className={`chat-message ${msg.sender}`}>
                 {msg.sender === 'bot' ? (
-                  index === currentMessageIndex && streamingBotMessage ? (
-                    <ReactMarkdown>{streamingBotMessage}</ReactMarkdown>
-                  ) : (
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
-                  )
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
                 ) : (
                   <p>{msg.text}</p>
                 )}
               </div>
             ))}
-            {isTyping && currentMessageIndex === -1 && ( // Only show "Aditi is typing..." when not actively streaming
+            {isTyping && !fullBotMessage && ( // Show "Aditi is typing..." while waiting for response, but not during streaming
               <div className="chat-message bot">
                 <p>Aditi is typing...</p>
+              </div>
+            )}
+            {streamingBotMessage && ( // Display the streaming message as a separate chat bubble
+              <div className="chat-message bot">
+                <ReactMarkdown>{streamingBotMessage}</ReactMarkdown>
               </div>
             )}
           </div>

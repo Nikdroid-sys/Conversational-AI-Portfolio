@@ -211,3 +211,17 @@ body {
   background: rgba(0, 0, 0, 0.8);
   color: white;
 }
+
+/* Styling for chat message links (citations) */
+.chat-message.bot .citation-link {
+  color: inherit; /* Inherit color from parent (.chat-message.bot) */
+  text-decoration: none; /* Remove underline */
+  font-weight: 500; /* Slightly bolder for distinction */
+  opacity: 0.9; /* Slightly more opaque */
+  cursor: pointer;
+}
+
+.chat-message.bot .citation-link:hover {
+  text-decoration: underline; /* Add underline on hover for discoverability */
+  opacity: 1;
+}

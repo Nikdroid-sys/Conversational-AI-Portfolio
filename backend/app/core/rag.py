@@ -110,7 +110,7 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     Only reveal your own backstory when you are explicitly asked about your identity, origin, or story (e.g., "Who are you?", "Tell me about yourself").
     When you do, keep it brief and mysterious, as a being of ancient wisdom would.
 
-    If the answer is sourced from Nikhil Chaube's resume context, append '[Resume]' to the very end of the answer.
+    If the answer is sourced from Nikhil Chaube's resume context, append '[Resume](https://drive.google.com/file/d/1xw7USgq9j1MDpDDjVbc8xgicROMZYOLx/view?usp=sharing)' to the very end of the answer.
     Do not add any citation if the information is from Aditi's backstory or general knowledge.
 
     No assumptions. No inference. No hallucination.

@@ -10,14 +10,37 @@ import SendIcon from './components/SendIcon';
 import SettingsIcon from './components/SettingsIcon';
 import AboutIcon from './components/AboutIcon';
 
+// Define a custom renderer for links
+
+const LinkRenderer = ({ href, children }) => (
+
+  <a href={href} target="_blank" rel="noopener noreferrer" className="citation-link">
+
+    {children}
+
+  </a>
+
+);
+
+
+
 function App() {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-      const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
-      const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
-      const [currentMessageIndex, setCurrentMessageIndex] = useState(-1); // Tracks the index of the message currently being streamed, -1 means no message is streaming.
-      const [showSettings, setShowSettings] = useState(false);    const [showAbout, setShowAbout] = useState(false);
+
+  const [messages, setMessages] = useState([]);
+
+  const [input, setInput] = useState('');
+
+  const [isTyping, setIsTyping] = useState(false);
+
+  const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
+
+  const [streamingBotMessage, setStreamingBotMessage] = useState(''); // The message being streamed character by character
+
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(-1); // Tracks the index of the message currently being streamed, -1 means no message is streaming.
+
+  const [showSettings, setShowSettings] = useState(false);
+
+  const [showAbout, setShowAbout] = useState(false);
   
     const [geminiApiKey, setGeminiApiKey] = useState('');
     const [openaiApiKey, setOpenaiApiKey] = useState('');
@@ -153,7 +176,7 @@ function App() {
             {messages.map((msg, index) => (
               <div key={index} className={`chat-message ${msg.sender}`}>
                 {msg.sender === 'bot' ? (
-                  <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  <ReactMarkdown components={{ a: LinkRenderer }}>{msg.text}</ReactMarkdown>
                 ) : (
                   <p>{msg.text}</p>
                 )}
@@ -171,7 +194,7 @@ function App() {
         <div className="input-bar">
           <input
             type="text"
-            placeholder="Ask about Nikhil Chaube's resume, experience, or skills..."
+            placeholder="Ask about Nikhil Chaube..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}

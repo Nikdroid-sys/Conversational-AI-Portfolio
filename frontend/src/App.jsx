@@ -145,8 +145,7 @@ function App() {
       <main className="main-content">
         {messages.length === 0 ? (
           <div className="welcome-message">
-            <h1>Welcome, seeker of knowledge.</h1>
-            <p>Unveil the journey of Nikhil Chaube, guided by Aditi's wisdom.</p>
+            <p>Namaste. Insight awaits—ask about Nikhil Chaube.</p>
           </div>
         ) : (
           <div className="chat-container">

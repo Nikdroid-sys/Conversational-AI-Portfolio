@@ -49,24 +49,24 @@ body {
 }
 
 .welcome-message h1 {
-  font-size: 3.8rem; /* Big and clear */
-  margin: 0 0 0.5rem 0;
+  font-size: 3.2rem; /* Slightly reduced for less bulk, still impressive */
+  margin: 0 0 0.4rem 0; /* Adjusted margin */
   font-family: 'Lora', serif;
   font-weight: 700;
-  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9); /* Stronger shadow */
-  text-align: center; /* Center alignment */
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8); /* Slightly less aggressive shadow */
+  text-align: left; /* Align h1 to left */
   line-height: 1.2;
 }
 
 .welcome-message p {
-  font-size: 1.8rem; /* A little smaller */
+  font-size: 1.6rem; /* Slightly reduced for less bulk */
   margin: 0;
   font-family: 'Lora', serif; /* Elegant font */
-  font-weight: 500; /* Medium weight */
+  font-weight: 400; /* Lighter weight for subtitle */
   opacity: 0.9;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7); /* Refined shadow */
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6); /* Refined shadow */
   line-height: 1.4;
-  text-align: center; /* Center alignment */
+  text-align: left; /* Align p to left */
 }
 
 .chat-container {

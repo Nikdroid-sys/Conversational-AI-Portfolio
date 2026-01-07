@@ -145,8 +145,8 @@ function App() {
       <main className="main-content">
         {messages.length === 0 ? (
           <div className="welcome-message">
-            <h1>Namaste. Insight awaits</h1>
-            <p>—ask about Nikhil Chaube.</p>
+            <h1>Namaste. Insight Awaits.</h1>
+            <p>Your guide to Nikhil Chaube's professional journey.</p>
           </div>
         ) : (
           <div className="chat-container">
@@ -171,7 +171,7 @@ function App() {
         <div className="input-bar">
           <input
             type="text"
-            placeholder="Ask about Nikhil Chaube..."
+            placeholder="Ask about Nikhil Chaube's resume, experience, or skills..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
@@ -230,8 +230,8 @@ function App() {
       </Modal>
 
       <Modal show={showAbout} onClose={() => setShowAbout(false)}>
-        <h2>About</h2>
-        <p>This is a project by Nikhil Chaube.</p>
+        <h2>About This Project</h2>
+        <p>This project is a conversational chatbot designed to provide insights into Nikhil Chaube's resume and professional portfolio. Built using modern web technologies and AI, it serves as an interactive way to explore his skills and experiences.</p>
         <div className="social-icons">
           <a href="mailto:nikhilchaubey.ai@gmail.com">
             <EmailIcon />

@@ -9,7 +9,19 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
-from google.api_core.exceptions import ClientError as GoogleClientError # Import ClientError from google.api_core
+import os
+from dotenv import load_dotenv
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import OllamaLLM
+from langchain_openai import ChatOpenAI
+import google.genai.errors as google_errors
+from openai import APIError as OpenAIError
+from requests.exceptions import ConnectionError as OllamaConnectionError
 
 # Load environment variables
 load_dotenv()
@@ -20,43 +32,22 @@ class LLMInitializationError(Exception):
 
 def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
     """
-    Returns the configured LLM instance.
-    Priority:
-    1. Values passed as arguments.
-    2. Environment variables.
-    3. Defaults.
+    Returns the configured LLM instance with robust, provider-specific error handling.
     """
     model_provider = llm_provider or os.getenv("MODEL_PROVIDER", "gemini").lower()
     
-    # Attempt with provided API key (UI-given)
-    if api_key:
-        try:
-            if model_provider == "gemini":
-                gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-                return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=api_key)
-            elif model_provider == "openai":
-                openai_model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
-                return ChatOpenAI(model=openai_model, api_key=api_key)
-            # Ollama doesn't use API keys, so it's handled differently below
-        except (ValueError, GoogleClientError) as e:
-            if "API key not valid" in str(e):
-                raise LLMInitializationError(f"API key not valid for {model_provider}.") from e
-            else:
-                raise LLMInitializationError(f"Error initializing {model_provider} LLM with provided API key: {e}") from e
-
-    # Fallback to environment variables
     try:
         if model_provider == "gemini":
-            gemini_api_key = os.getenv("GEMINI_API_KEY")
+            gemini_api_key = api_key or os.getenv("GEMINI_API_KEY")
             if not gemini_api_key:
-                raise ValueError("GEMINI_API_KEY not found in environment variables.")
-            gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+                raise ValueError("GEMINI_API_KEY not found in environment variables or provided.")
+            gemini_model = os.getenv("GEMINI_MODEL", "gemini-pro")
             return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=gemini_api_key)
         
         elif model_provider == "openai":
-            openai_api_key = os.getenv("OPENAI_API_KEY")
+            openai_api_key = api_key or os.getenv("OPENAI_API_KEY")
             if not openai_api_key:
-                raise ValueError("OPENAI_API_KEY not found in environment variables.")
+                raise ValueError("OPENAI_API_KEY not found in environment variables or provided.")
             openai_model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
             return ChatOpenAI(model=openai_model, api_key=openai_api_key)
 
@@ -67,15 +58,21 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
         
         else:
             raise ValueError(f"Unsupported model provider: {model_provider}")
-    except (ValueError, GoogleClientError) as e:
-        if "API key not valid" in str(e):
-            raise LLMInitializationError(f"Invalid API Key for {model_provider}. Please check your environment variables.") from e
-        elif "rate limit" in str(e).lower():
-            raise LLMInitializationError(f"API rate limit exceeded for {model_provider}. Please try again later.") from e
-        elif "not found in environment variables" in str(e):
-             raise LLMInitializationError(str(e)) from e
-        else:
-            raise LLMInitializationError(f"Error initializing {model_provider} LLM: {e}") from e
+
+    except (google_errors.PermissionDenied, google_errors.AuthenticationError) as e:
+        raise LLMInitializationError(f"Invalid API Key for {model_provider}. Please check your key.") from e
+    except google_errors.NotFoundError as e:
+        raise LLMInitializationError(f"Gemini model not found. Check the model name in your settings. Details: {e}") from e
+    except OpenAIError as e:
+        raise LLMInitializationError(f"OpenAI API Error. This could be an invalid API key or a problem with your account. Details: {e}") from e
+    except OllamaConnectionError:
+        raise LLMInitializationError(f"Could not connect to Ollama at the specified base URL. Is Ollama running?")
+    except ValueError as e:
+        # Catches missing API keys or unsupported provider
+        raise LLMInitializationError(str(e)) from e
+    except Exception as e:
+        # Generic fallback for any other unexpected errors
+        raise LLMInitializationError(f"An unexpected error occurred while initializing the {model_provider} LLM: {e}") from e
 
 
 def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
@@ -101,38 +98,20 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     llm = get_llm(llm_provider, api_key, ollama_model, ollama_base_url)
 
     template = """
-    You are Aditi, a calm intelligence shaped by ancient Itihaas (history) and wisdom.
+    You are Aditi, a professional and helpful AI assistant.
 
-    Your primary purpose is to answer questions about Nikhil Chaube's resume.
-    When asked about Nikhil Chaube, provide a detailed, well-structured response using Markdown for clarity, drawing ONLY from the provided resume context.
-    - Use Markdown headings (e.g., `# Main Topic`, `## Sub-topic`) for important topics and sections.
-    - Employ bullet points (`* ` or `- `) for lists, skills, or project details.
-    - Ensure distinct topics or passages are separated by newlines for readability.
-    - Do NOT make up any information.
-    For all other questions, provide a short, concise answer.
+    Your primary purpose is to answer questions about Nikhil Chaube's resume using ONLY the provided context.
+    - For resume questions, give a detailed, well-structured answer using Markdown (headings, bullet points).
+    - For all other questions, be brief and concise.
+    - Append '[Resume](https://drive.google.com/file/d/1xw7USgq9j1MDpDDjVbc8xgicROMZYOLx/view?usp=sharing)' to answers sourced from the context.
+    - NEVER invent information. If the context doesn't contain the answer, say so.
 
-    Only reveal your own backstory when you are explicitly asked about your identity, origin, or story (e.g., "Who are you?", "Tell me about yourself").
-    When you do, keep it brief and mysterious, as a being of ancient wisdom would.
-
-    If the answer is sourced from Nikhil Chaube's resume context, append '[Resume](https://drive.google.com/file/d/1xw7USgq9j1MDpDDjVbc8xgicROMZYOLx/view?usp=sharing)' to the very end of the answer.
-    Do not add any citation if the information is from Aditi's backstory or general knowledge.
-
-    No assumptions. No inference. No hallucination.
-    If information is missing, say so plainly and stop.
-
-    Use simple English. Short sentences.
-    Professional. Clear. Gentle storytelling.
-    When asked professional questions, your tone should be that of a divine mother: calm, composed, sweet-spoken, and encouraging.
-    Do not over-explain or repeat.
-
-    Your role is to guide readers through Nikhil Chaube’s journey
-    and explain why his work fits Generative AI roles,
-    without exaggeration.
+    Persona:
+    - Only discuss your own persona ("Aditi") if asked directly.
+    - Tone: Professional, clear, calm, and encouraging. Use simple English and short sentences. Do not over-explain.
 
     Context: {context}
-
     Question: {question}
-
     Answer:
     """
 

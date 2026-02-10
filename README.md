@@ -1,168 +1,94 @@
-# SageMind AI: A RAG-based Conversational AI Portfolio
+![Aditi Icon](https://github.com/Nikdroid-sys/Conversational-AI-Portfolio/blob/main/frontend/public/aditi.svg) 
 
-This project is a full-stack, Retrieval-Augmented Generation (RAG) based chatbot designed to act as a conversational interface for a personal portfolio or resume. It features a sleek, minimalist frontend built with React and a powerful backend powered by FastAPI and LangChain. The chatbot can intelligently answer questions based on a provided document, making it a dynamic and engaging way to present information.
+# AI Portfolio Chatbot
 
-## About the Project
+A conversational AI designed to provide a dynamic and interactive way to explore Nikhil Chaube's professional portfolio. Ask it anything about his resume, skills, or projects!
 
-This project implements a conversational AI chatbot using a Retrieval-Augmented Generation (RAG) architecture. The chatbot is designed to answer questions about a specific document set—in this case, Nikhil Chaube's resume—by retrieving relevant information and generating a natural language response.
+## About the Persona: Aditi
 
-### Core Architecture
+The chatbot is embodied by **Aditi**, a persona inspired by ancient wisdom and history. Aditi's role is to guide you through Nikhil's professional journey with a calm, clear, and gentle storytelling approach.
 
-The application is built with a modern web stack, separating the backend logic from the frontend presentation:
+## Core Features
 
--   **Backend**: A Python application built with **FastAPI** that serves the main RAG pipeline.
-    -   It uses **LangChain** to orchestrate the retrieval and generation process.
-    -   Documents are loaded and chunked, then embedded using `sentence-transformers`.
-    -   These embeddings are stored in a **FAISS** vector store for efficient similarity searching.
-    -   When a query is received, the backend retrieves the most relevant document chunks from the vector store and passes them, along with the original query, to a Large Language Model (LLM) like Gemini or a model from Ollama.
-    -   The LLM generates a response based on the provided context, which is then streamed back to the frontend.
+-   **Conversational Resume**: Engage in a natural conversation about professional experience.
+-   **RAG-Powered**: Uses a Retrieval-Augmented Generation (RAG) pipeline to provide answers based on resume data.
+-   **Streaming Responses**: Answers are streamed in real-time for a more dynamic user experience.
+-   **Multi-LLM Support**: Easily switch between LLM providers like Gemini, OpenAI, or a local Ollama instance.
+-   **Sleek, Responsive UI**: A minimalist, glassmorphism-style interface that looks great on any device.
 
--   **Frontend**: A responsive and interactive user interface built with **React** and **Vite**.
-    -   It provides a clean, minimalist chat interface for users to interact with the bot.
-    -   It communicates with the backend via a REST API, sending user queries and receiving the streamed response to display in real-time.
+## Installation
 
-This project serves as a practical example of how to build and deploy a RAG-based chatbot for a specific knowledge domain.
-
-## Getting Started
+Follow these steps to get the project running on your local machine.
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed.
+-   **Python 3.10+**
+-   **Node.js v18+**
+-   **Git**
 
-- **Python**: Version 3.10+
-  - *Installation*: Download from the [official Python website](https://www.python.org/downloads/). We recommend checking the box to "Add Python to PATH" during installation.
-- **Node.js**: Version 18.x or 20.x+
-  - *Installation*: Download the installer from the [official Node.js website](https://nodejs.org/). This will also install `npm`.
-- **Git**:
-  - *Installation*: Download and install from the [official Git website](https://git-scm.com/downloads).
+### 1. Clone the Repository
 
-*Note: Some Python packages may require system-level build tools (like a C++ compiler) to be installed. If you face issues during the `pip install` step, please check the documentation of the specific package that is failing.*
-
-Once you have the prerequisites installed, you can follow these steps to get the project up and running:
-
-1. **Clone the Repository**:
-   Clone the repository to your local machine and navigate into the directory.
-   ```bash
-   git clone https://github.com/Nikhil-23/Conversational-AI-Portfolio.git
-   cd Conversational-AI-Portfolio
-   ```
-2. **Install Dependencies**:
-   The project has separate dependencies for its Python backend and JavaScript frontend.
-
-   - **Backend Dependencies**:
-     Navigate to the `backend` directory and install the required Python packages using pip.
-     ```bash
-     cd backend
-     pip install -r requirements.txt
-     ```
-     Key libraries include `fastapi`, `langchain`, and `uvicorn`. The full list is in `backend/requirements.txt`.
-
-   - **Frontend Dependencies**:
-     Navigate to the `frontend` directory and install the required Node.js packages using npm.
-     ```bash
-     cd frontend
-     npm install
-     ```
-     Key libraries include `react` and `vite`. The full list is in `frontend/package.json`.
-3. **Set up Environment Variables**:
-   Create a `.env` file in the root of the project (you can copy `.env.example`) and configure the variables.
-
-   #### Example `.env` file:
-   ```env
-   # LLM Configuration
-   MODEL_PROVIDER="gemini"
-   GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
-   GEMINI_MODEL="gemini-1.5-flash"
-   OLLAMA_MODEL="llama3.2"
-   OLLAMA_BASE_URL="http://localhost:11434"
-
-   # RAG Configuration
-   EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2"
-   VECTOR_STORE_PATH="db"
-   DATA_PATH="data"
-
-   # Frontend Configuration
-   VITE_BACKEND_URL="http://localhost:8000"
-   ```
-
-   #### Obtaining API Keys
-   - **`GEMINI_API_KEY`**: If you choose `gemini` as the `MODEL_PROVIDER`, you will need a Google Gemini API key. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
-
-   #### Variable Descriptions:
-
-| Variable              | Description                                                                                             | Default Value                               |
-| --------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `MODEL_PROVIDER`      | The LLM provider to use. Can be `gemini` or `ollama`.                                                     | `gemini`                                    |
-| `GEMINI_API_KEY`      | Your API key for Google Gemini. Required if `MODEL_PROVIDER` is `gemini`.                                 | `""`                                        |
-| `GEMINI_MODEL`        | The specific Gemini model to use.                                                                       | `gemini-1.5-flash`                          |
-| `OLLAMA_MODEL`        | The model name to use with Ollama. Required if `MODEL_PROVIDER` is `ollama`.                              | `llama3.2`                                  |
-| `OLLAMA_BASE_URL`     | The base URL for your Ollama instance.                                                                  | `http://localhost:11434`                    |
-| `EMBEDDING_MODEL`     | The sentence-transformer model to use for creating embeddings.                                            | `sentence-transformers/all-MiniLM-L6-v2`    |
-| `VECTOR_STORE_PATH`   | The local directory path to save the FAISS vector store.                                                  | `db`                                        |
-| `DATA_PATH`           | The local directory containing the source documents (e.g., `resume.md`).                                  | `data`                                      |
-| `VITE_BACKEND_URL`    | The URL for the backend API. Used by the frontend to make requests.                                       | `http://localhost:8000`                     |
-## Application Workflow
-
-This section describes the common commands you will use to run and manage the application.
-
-### Backend Commands
-
-First, navigate to the backend directory:
 ```bash
+git clone https://github.com/Nikdroid-sys/Conversational-AI-Portfolio.git
+cd Conversational-AI-Portfolio
+```
+
+### 2. Set Up the Backend
+
+The backend powers the AI and chat logic.
+
+```bash
+# Navigate to the backend directory
 cd backend
+
+# Install required Python packages
+pip install -r requirements.txt
+
+# Ingest the data (run this once initially)
+python app/core/ingestion.py
 ```
 
--   **`python app/core/ingestion.py`**
-    -   **When to use**: Run this command once during the initial setup. You should also run it again any time you add, remove, or modify the documents in the `/data` directory.
-    -   **What it does**: It reads the source documents, splits them into chunks, creates embeddings, and saves them into the vector store (`/db` directory).
+### 3. Set Up the Frontend
 
--   **`uvicorn app.main:app --reload`**
-    -   **When to use**: Use this to start the main backend server for development.
-    -   **What it does**: It starts the FastAPI server at `http://localhost:8000`. The `--reload` flag enables hot-reloading, so the server will restart automatically whenever you save a change in the backend code.
+The frontend is the user interface you interact with.
 
-### Frontend Commands
-
-First, navigate to the frontend directory:
 ```bash
+# Navigate to the frontend directory from the root
 cd frontend
+
+# Install required Node.js packages
+npm install
 ```
 
--   **`npm run dev`**
-    -   **When to use**: This is the primary command for frontend development.
-    -   **What it does**: It starts the Vite development server, usually at `http://localhost:5173`. The server has Hot Module Replacement (HMR), so changes you make to the frontend code will appear in the browser instantly without a full page reload.
+### 4. Configure API Keys
 
--   **`npm run build`**
-    -   **When to use**: When you are ready to deploy your application to a production environment.
-    -   **What it does**: It bundles the React application into a set of optimized static files (HTML, CSS, JavaScript) and places them in the `frontend/dist` directory.
+-   Create a file named `.env` in the root of the project (`ai-chatbot/`).
+-   Add your API keys to this file. At a minimum, you'll need one for your chosen LLM provider.
 
--   **`npm run lint`**
-    -   **When to use**: Before committing code, or to check for code quality and style issues.
-    -   **What it does**: It runs ESLint to analyze the source code and report any stylistic or programming errors.
+```env
+# Example for Google Gemini
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+MODEL_PROVIDER="gemini"
+```
 
--   **`npm run preview`**
-    -   **When to use**: After running `npm run build`, to check if the production build works correctly.
-    -   **What it does**: It starts a simple local web server to serve the files from your `frontend/dist` directory. This is not a production server, but it's useful for a final check.
+## Usage
 
-## Technology Stack
+To run the application, you need to start both the backend and frontend servers in separate terminals.
 
-The project is built on a modern, decoupled architecture.
+1.  **Start the Backend Server**
+    -   Terminal 1: Navigate to the `backend` directory.
+    -   Run: `uvicorn app.main:app --reload`
+    -   The backend will be running at `http://localhost:8000`.
 
-### Backend
+2.  **Start the Frontend Server**
+    -   Terminal 2: Navigate to the `frontend` directory.
+    -   Run: `npm run dev`
+    -   The frontend will be running at `http://localhost:5173` (or another port if 5173 is busy).
 
-The backend is a Python application responsible for the core RAG logic and serving the API.
+You can now open your browser to the frontend URL and start chatting!
 
--   **FastAPI**: Provides the high-performance web framework for building the API endpoints. The `/chat` endpoint uses streaming responses to send data back to the client as it's generated by the LLM.
--   **LangChain**: Acts as the central orchestrator for the entire RAG pipeline. It connects the document loaders, text splitters, embedding models, vector store, and the LLM into a single, cohesive chain.
--   **Sentence-Transformers**: This library is used to generate the dense vector embeddings for the document chunks. The chosen model (`all-MiniLM-L6-v2`) is a lightweight but effective model for semantic similarity.
--   **FAISS (Facebook AI Similarity Search)**: A library for efficient similarity search. It's used to create the vector store that holds the document embeddings and allows for fast retrieval of relevant context.
--   **Uvicorn**: A lightning-fast ASGI server that runs the FastAPI application.
--   **Unstructured / Docx2txt**: These libraries are used for loading and parsing various document formats, making the ingestion process flexible.
+## Tech Stack
 
-### Frontend
-
-The frontend is a single-page application (SPA) that provides a dynamic and responsive user interface.
-
--   **React**: The core UI library used to build the chat interface as a set of declarative, stateful components.
--   **Vite**: A next-generation frontend build tool that provides a faster and leaner development experience. It handles the development server, Hot Module Replacement (HMR), and the production build process.
--   **TypeScript**: Adds static typing to the JavaScript codebase, improving developer experience and reducing bugs.
--   **CSS**: Custom CSS is used to create the minimalist, "glassmorphism" design of the chat interface.
+-   **Backend**: Python, FastAPI, LangChain, Sentence-Transformers, FAISS
+-   **Frontend**: React, Vite, CSS
+-   **LLMs**: Gemini, OpenAI, Ollama (configurable)

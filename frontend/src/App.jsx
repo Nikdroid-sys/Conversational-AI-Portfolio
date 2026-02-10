@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import './App.css';
 import Icons from './components/Icons';
 import Modal from './components/Modal';
+import aditiIcon from '/aditi.svg';
 import GithubIcon from './components/GithubIcon';
 import LinkedinIcon from './components/LinkedinIcon';
 import EmailIcon from './components/EmailIcon';
@@ -291,7 +292,7 @@ function App() {
                     {msg.isError && <ErrorIcon />}
                     {msg.isTyping ? (
                       <div className="typing-indicator">
-                        <img src="/aditi.svg" alt="Aditi icon" className="typing-icon" />
+                        <img src={aditiIcon} alt="Aditi icon" className="typing-icon" />
                         <span></span>
                       </div>
                     ) : (

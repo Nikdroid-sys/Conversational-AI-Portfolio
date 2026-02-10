@@ -8,7 +8,7 @@
 }
 
 .icon {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: rgba(0, 0, 0, 0.5);
   /* backdrop-filter: blur(5px); */
   /* -webkit-backdrop-filter: blur(5px); */
   border-radius: 15px; /* Slightly rounded rectangle */
@@ -25,7 +25,7 @@
 }
 
 .icon:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: rgba(0, 0, 0, 0.6);
   /* transform: translateY(-2px); /* Subtle lift effect */
 }
 

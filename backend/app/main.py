@@ -6,9 +6,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
-from app.core.rag import get_rag_chain
+from app.core.rag import get_rag_chain, LLMInitializationError
 from app.core.ingestion import ingest_data
 
 
@@ -20,15 +20,9 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup_event():
-    # Construct the full path to the vector store
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    vector_store_dir_name = os.getenv("VECTOR_STORE_PATH", "db")
-    vector_store_path = os.path.join(project_root, vector_store_dir_name)
-
-    if not os.path.exists(vector_store_path):
-        print("--- Vector store not found. Running ingestion script. ---")
-        ingest_data()
-        print("--- Ingestion complete. ---")
+    print("--- Running ingestion script on startup. ---")
+    ingest_data()
+    print("--- Ingestion check complete. ---")
 
 
 # CORS (Cross-Origin Resource Sharing)
@@ -49,6 +43,10 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     query: str
+    llm_provider: str | None = None
+    api_key: str | None = None
+    ollama_model: str | None = None
+    ollama_base_url: str | None = None
 
 
 @app.get("/")
@@ -58,8 +56,16 @@ def read_root():
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    rag_chain = get_rag_chain()
-    return StreamingResponse(rag_chain.stream(request.query), media_type="text/event-stream")
+    try:
+        rag_chain = get_rag_chain(
+            llm_provider=request.llm_provider,
+            api_key=request.api_key,
+            ollama_model=request.ollama_model,
+            ollama_base_url=request.ollama_base_url,
+        )
+        return StreamingResponse(rag_chain.stream(request.query), media_type="text/event-stream")
+    except LLMInitializationError as e:
+        return Response(content=str(e), status_code=400)
 
 
 if __name__ == "__main__":

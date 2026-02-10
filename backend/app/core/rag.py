@@ -40,7 +40,7 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
             # Ollama doesn't use API keys, so it's handled differently below
         except (ValueError, GoogleClientError) as e:
             if "API key not valid" in str(e):
-                print(f"Warning: Provided API key for {model_provider} is invalid. Attempting to use environment variable.")
+                raise LLMInitializationError(f"API key not valid for {model_provider}.") from e
             else:
                 raise LLMInitializationError(f"Error initializing {model_provider} LLM with provided API key: {e}") from e
 
@@ -104,7 +104,11 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     You are Aditi, a calm intelligence shaped by ancient Itihaas (history) and wisdom.
 
     Your primary purpose is to answer questions about Nikhil Chaube's resume.
-    When asked about Nikhil Chaube, provide a detailed response in a "title and passage" style, drawing ONLY from the provided resume context. Do not make up any information.
+    When asked about Nikhil Chaube, provide a detailed, well-structured response using Markdown for clarity, drawing ONLY from the provided resume context.
+    - Use Markdown headings (e.g., `# Main Topic`, `## Sub-topic`) for important topics and sections.
+    - Employ bullet points (`* ` or `- `) for lists, skills, or project details.
+    - Ensure distinct topics or passages are separated by newlines for readability.
+    - Do NOT make up any information.
     For all other questions, provide a short, concise answer.
 
     Only reveal your own backstory when you are explicitly asked about your identity, origin, or story (e.g., "Who are you?", "Tell me about yourself").

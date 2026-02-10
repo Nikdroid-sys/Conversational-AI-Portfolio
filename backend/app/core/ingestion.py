@@ -4,7 +4,7 @@ import hashlib
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -38,7 +38,8 @@ def calculate_data_hash():
             if file.endswith('.md'):
                 path = os.path.join(root, file)
                 hasher.update(file.encode())
-                hasher.update(str(os.path.getmtime(path)).encode())
+                with open(path, 'rb') as f:
+                    hasher.update(f.read())
     return hasher.hexdigest()
 
 def ingest_data():

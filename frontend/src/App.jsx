@@ -11,6 +11,7 @@ import SendIcon from './components/SendIcon';
 import SettingsIcon from './components/SettingsIcon';
 import AboutIcon from './components/AboutIcon';
 import ErrorIcon from './components/ErrorIcon';
+import HomeIcon from './components/HomeIcon';
 
 // Define a custom renderer for links
 
@@ -34,35 +35,35 @@ function App() {
 
   const [isTyping, setIsTyping] = useState(false);
 
-  const [fullBotMessage, setFullBotMessage] = useState(''); // Stores the complete message once received
-
-  const [citation, setCitation] = useState('');
+  const [fullBotMessage, setFullBotMessage] = useState('');
 
   const [currentMessageIndex, setCurrentMessageIndex] = useState(-1); // Tracks the index of the message currently being streamed, -1 means no message is streaming.
 
   const [showSettings, setShowSettings] = useState(false);
 
   const [showAbout, setShowAbout] = useState(false);
-  
-    const [geminiApiKey, setGeminiApiKey] = useState('');
-    const [openaiApiKey, setOpenaiApiKey] = useState('');
-      const [ollamaUrl, setOllamaUrl] = useState('');
-      const [ollamaModel, setOllamaModel] = useState('');
-      const [llmProvider, setLlmProvider] = useState('gemini');  
-    const handleSend = async () => {
-      if (input.trim() === '') return;
 
-      const userMessage = { text: input, sender: 'user' };
-      // Optimistically add user's message and a placeholder for bot's message
-      setMessages(prevMessages => {
-        const newMessagesArray = [...prevMessages, userMessage, { text: 'Aditi is typing', sender: 'bot', isTyping: true }];
-        setCurrentMessageIndex(newMessagesArray.length - 1); // Index of the new bot message
-        return newMessagesArray;
-      });
-      
-          setInput('');
-          // setIsTyping is no longer the primary driver of the "typing" message, but we can keep it for other potential uses.
-          setIsTyping(true); 
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [ollamaUrl, setOllamaUrl] = useState('');
+  const [ollamaModel, setOllamaModel] = useState('');
+  const [llmProvider, setLlmProvider] = useState('gemini');
+  const handleSend = async () => {
+    if (input.trim() === '') return;
+
+    const userMessage = { text: input, sender: 'user' };
+    let botMessageIndex;
+    // Optimistically add user's message and a placeholder for bot's message
+    setMessages(prevMessages => {
+      const newMessagesArray = [...prevMessages, userMessage, { text: 'Aditi is typing', sender: 'bot', isTyping: true }];
+      botMessageIndex = newMessagesArray.length - 1;
+      setCurrentMessageIndex(botMessageIndex); // Index of the new bot message
+      return newMessagesArray;
+    });
+
+    setInput('');
+    // setIsTyping is no longer the primary driver of the "typing" message, but we can keep it for other potential uses.
+    setIsTyping(true);
     let requestBody = {
       query: input,
       llm_provider: llmProvider,
@@ -78,7 +79,15 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      // Use the environment variable injected by GitHub Actions, 
+      // or fall back to localhost for your local development.
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+      if (import.meta.env.DEV) {
+        console.log('Aditi is in Dev Mode. Connecting to:', API_BASE_URL);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,29 +100,31 @@ function App() {
         throw new Error(errorText || 'An error occurred on the server.');
       }
 
-      if (!response.body) return;
-
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedBotMessage = '';
+      let firstChunk = true;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          // Extract citation if present
-          const citationRegex = /\[Resume\]\((https:\/\/drive\.google\.com\/file\/d\/[^\/]+\/view\?usp=sharing)\)$/;
-          const citationMatch = accumulatedBotMessage.match(citationRegex);
+          setMessages(prev => {
+            const newMessages = [...prev];
+            if (newMessages[botMessageIndex]) {
+              newMessages[botMessageIndex] = { ...newMessages[botMessageIndex], isTyping: false };
+            }
+            return newMessages;
+          });
 
-          if (citationMatch) {
-            setCitation(citationMatch[1]); // Store the URL part of the citation
-            accumulatedBotMessage = accumulatedBotMessage.replace(citationRegex, '').trim(); // Remove citation from the message
-          }
+          setFullBotMessage(accumulatedBotMessage);
 
-          setFullBotMessage(accumulatedBotMessage); // Set the full message once streaming is done
           setIsTyping(false);
+          setCurrentMessageIndex(-1);
           break;
         }
-        accumulatedBotMessage += decoder.decode(value, { stream: true });
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedBotMessage += chunk;
       }
     } catch (error) {
       console.error('Error fetching chat response:', error);
@@ -143,16 +154,20 @@ function App() {
 
         // Check if the last message is a bot message placeholder
         if (lastMessageIndex >= 0 && updatedMessages[lastMessageIndex].sender === 'bot' && updatedMessages[lastMessageIndex].isTyping) {
-          updatedMessages[lastMessageIndex] = { text: userFacingErrorMessage, sender: 'bot', isError: true };
+          updatedMessages[lastMessageIndex] = { text: userFacingErrorMessage, sender: 'bot', isError: true, isTyping: false };
         } else {
           // Otherwise, just append the error message
-          updatedMessages.push({ text: userFacingErrorMessage, sender: 'bot', isError: true });
+          updatedMessages.push({ text: userFacingErrorMessage, sender: 'bot', isError: true, isTyping: false });
         }
         return updatedMessages;
       });
     }
   };
 
+
+  const handleHomeClick = () => {
+    setMessages([]);
+  };
 
   const handleCloseSettings = () => {
     const savedGeminiApiKey = localStorage.getItem('geminiApiKey') || '';
@@ -229,50 +244,48 @@ function App() {
   }, [messages]); // Keep this useEffect for scroll
 
   useEffect(() => {
-    if (fullBotMessage && currentMessageIndex !== -1) {
+    if (fullBotMessage) {
       let i = 0;
       const typingInterval = setInterval(() => {
         if (i < fullBotMessage.length) {
-          setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            // Start streaming, remove the isTyping flag
-            updatedMessages[currentMessageIndex] = { ...updatedMessages[currentMessageIndex], text: fullBotMessage.substring(0, i + 1), isTyping: false };
-            return updatedMessages;
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = {
+              ...newMessages[newMessages.length - 1],
+              text: fullBotMessage.substring(0, i + 1),
+            };
+            return newMessages;
           });
           i++;
         } else {
           clearInterval(typingInterval);
-          setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            // Ensure the isTyping flag is false and append citation if it exists
-            if (citation) {
-              const currentMessageText = updatedMessages[currentMessageIndex].text;
-              updatedMessages[currentMessageIndex] = {
-                ...updatedMessages[currentMessageIndex],
-                isTyping: false,
-                text: `${currentMessageText} [Resume](${citation})`
-              };
-            } else {
-              updatedMessages[currentMessageIndex] = {
-                ...updatedMessages[currentMessageIndex],
-                isTyping: false,
-              };
+          setMessages(prev => {
+            const newMessages = [...prev];
+            let finalMessage = fullBotMessage;
+            if (finalMessage.includes('[RESUME]')) {
+              finalMessage = finalMessage.replace('[RESUME]', '[Resume](https://drive.google.com/file/d/1xw7USgq9j1MDpDDjVbc8xgicROMZYOLx/view?usp=sharing)');
             }
-            return updatedMessages;
+            newMessages[newMessages.length - 1] = {
+              ...newMessages[newMessages.length - 1],
+              text: finalMessage,
+            };
+            return newMessages;
           });
-          setFullBotMessage(''); // Clear fullBotMessage after streaming
-          setCitation(''); // Clear citation after it's been appended
-          setCurrentMessageIndex(-1); // Reset index
-          setIsTyping(false); // Ensure global isTyping is false
+          setFullBotMessage('');
         }
-      }, 25); // Adjust typing speed here (milliseconds per character)
+      }, 25); // Adjust typing speed here
 
-      return () => clearInterval(typingInterval); // Cleanup on unmount or fullBotMessage change
+      return () => clearInterval(typingInterval);
     }
-  }, [fullBotMessage, currentMessageIndex, citation]); // Add citation to dependency array
+  }, [fullBotMessage]);
+
+
 
   return (
     <div className="App">
+      <div className="home-icon-container" onClick={handleHomeClick} title="Click to Home">
+        <HomeIcon />
+      </div>
       <Icons
         onSettingsClick={() => setShowSettings(true)}
         onAboutClick={() => setShowAbout(true)}
@@ -285,25 +298,28 @@ function App() {
           </div>
         ) : (
           <div className="chat-container">
-            {messages.map((msg, index) => (
-              <div key={index} className={`chat-message ${msg.sender}${msg.isError ? ' error' : ''}${msg.isTyping ? ' typing' : ''}`}>
-                {msg.sender === 'bot' ? (
-                  <div className="bot-message-content">
-                    {msg.isError && <ErrorIcon />}
-                    {msg.isTyping ? (
-                      <div className="typing-indicator">
-                        <img src={aditiIcon} alt="Aditi icon" className="typing-icon" />
-                        <span></span>
-                      </div>
-                    ) : (
-                      <ReactMarkdown components={{ a: LinkRenderer }}>{msg.text}</ReactMarkdown>
-                    )}
-                  </div>
-                ) : (
-                  <p>{msg.text}</p>
-                )}
-              </div>
-            ))}
+            {messages.map((msg, index) => {
+              if (!msg) return null;
+              return (
+                <div key={index} className={`chat-message ${msg.sender}${msg.isError ? ' error' : ''}${msg.isTyping ? ' typing' : ''}`}>
+                  {msg.sender === 'bot' ? (
+                    <div className="bot-message-content">
+                      {msg.isError && <ErrorIcon />}
+                      {msg.isTyping ? (
+                        <div className="typing-indicator">
+                          <img src={aditiIcon} alt="Aditi icon" className="typing-icon" />
+                          <span></span>
+                        </div>
+                      ) : (
+                        <ReactMarkdown components={{ a: LinkRenderer }}>{msg.text || ''}</ReactMarkdown>
+                      )}
+                    </div>
+                  ) : (
+                    <p>{msg.text || ''}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>

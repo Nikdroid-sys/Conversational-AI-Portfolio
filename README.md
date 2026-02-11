@@ -1,5 +1,4 @@
 ![Aditi Icon](https://github.com/Nikdroid-sys/Conversational-AI-Portfolio/blob/main/frontend/public/aditi.svg) 
-
 # AI Portfolio Chatbot
 
 A conversational AI designed to provide a dynamic and interactive way to explore Nikhil Chaube's professional portfolio. Ask it anything about his resume, skills, or projects!

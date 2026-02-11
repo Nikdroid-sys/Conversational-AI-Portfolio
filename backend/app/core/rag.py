@@ -1,24 +1,21 @@
+import os
+from dotenv import load_dotenv
 
-import os
-from dotenv import load_dotenv
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
+# LangChain Core & Chains
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import OllamaLLM
-from langchain_openai import ChatOpenAI
-import os
-from dotenv import load_dotenv
+
+# Vector Store & Embeddings
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
+
+# LLM Providers
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
+from langchain_ollama import OllamaLLM
+
+# Error Handling
 import google.genai.errors as google_errors
 from openai import APIError as OpenAIError
 from requests.exceptions import ConnectionError as OllamaConnectionError
@@ -32,7 +29,7 @@ class LLMInitializationError(Exception):
 
 def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
     """
-    Returns the configured LLM instance with robust, provider-specific error handling.
+    Returns the configured LLM instance with 2026-stable model versions.
     """
     model_provider = llm_provider or os.getenv("MODEL_PROVIDER", "gemini").lower()
     
@@ -40,19 +37,28 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
         if model_provider == "gemini":
             gemini_api_key = api_key or os.getenv("GEMINI_API_KEY")
             if not gemini_api_key:
-                raise ValueError("GEMINI_API_KEY not found in environment variables or provided.")
-            gemini_model = os.getenv("GEMINI_MODEL", "gemini-pro")
-            return ChatGoogleGenerativeAI(model=gemini_model, google_api_key=gemini_api_key)
+                raise ValueError("GEMINI_API_KEY not found.")
+            
+            # FIX: Using gemini-2.5-flash to avoid the 404 error in Feb 2026
+            # We force version='v1' to ensure it uses the stable production endpoint
+            return ChatGoogleGenerativeAI(
+                model="Gemini 2.5 Flash-Lite", 
+                google_api_key=gemini_api_key,
+                # Move version here to stop the warning
+                model_kwargs={"version": "v1"},
+                temperature=0.3
+            )
         
         elif model_provider == "openai":
             openai_api_key = api_key or os.getenv("OPENAI_API_KEY")
             if not openai_api_key:
-                raise ValueError("OPENAI_API_KEY not found in environment variables or provided.")
-            openai_model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+                raise ValueError("OPENAI_API_KEY not found.")
+            # Modern 2026 OpenAI models
+            openai_model = os.getenv("OPENAI_MODEL", "gpt-4.5-turbo")
             return ChatOpenAI(model=openai_model, api_key=openai_api_key)
 
         elif model_provider == "ollama":
-            model = ollama_model or os.getenv("OLLAMA_MODEL", "llama3.2")
+            model = ollama_model or os.getenv("OLLAMA_MODEL", "llama3.3")
             base_url = ollama_base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
             return OllamaLLM(model=model, base_url=base_url)
         
@@ -60,93 +66,101 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
             raise ValueError(f"Unsupported model provider: {model_provider}")
 
     except (google_errors.PermissionDenied, google_errors.AuthenticationError) as e:
-        raise LLMInitializationError(f"Invalid API Key for {model_provider}. Please check your key.") from e
-    except google_errors.NotFoundError as e:
-        raise LLMInitializationError(f"Gemini model not found. Check the model name in your settings. Details: {e}") from e
+        raise LLMInitializationError(f"Gemini Auth failed. Check your API key.") from e
     except OpenAIError as e:
-        raise LLMInitializationError(f"OpenAI API Error. This could be an invalid API key or a problem with your account. Details: {e}") from e
+        raise LLMInitializationError(f"OpenAI error: {e}") from e
     except OllamaConnectionError:
-        raise LLMInitializationError(f"Could not connect to Ollama at the specified base URL. Is Ollama running?")
-    except ValueError as e:
-        # Catches missing API keys or unsupported provider
-        raise LLMInitializationError(str(e)) from e
+        raise LLMInitializationError("Ollama is not running. Check local server.")
     except Exception as e:
-        # Generic fallback for any other unexpected errors
-        raise LLMInitializationError(f"An unexpected error occurred while initializing the {model_provider} LLM: {e}") from e
-
+        raise LLMInitializationError(f"Initialization Error ({model_provider}): {e}")
 
 def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=None):
     """
-    Creates and returns a RAG chain.
+    Creates the complete RAG chain with Aditi persona and vector retrieval.
     """
-    # Determine the project root dynamically
+    # # 1. Path & Resource Setup
+    # # Determine the project root dynamically
+    # current_dir = os.path.dirname(os.path.abspath(__file__))
+    # project_root = os.path.join(current_dir, '..', '..', '..')
+    # vector_store_path = os.path.join(project_root, 'db')
+    # 1. Get the directory where rag.py is located
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.join(current_dir, '..', '..', '..')
 
-    vector_store_dir_name = os.getenv("VECTOR_STORE_PATH", "db")
-    vector_store_path = os.path.join(project_root, vector_store_dir_name)
+    # 2. Find the project root by looking for the 'backend' folder
+    # This works as long as 'db' and 'backend' are in the same parent folder
+    project_root = os.path.abspath(os.path.join(current_dir, "../../../")) 
 
-    embedding_model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+    # 3. Join with 'db'
+    vector_store_path = os.path.join(project_root, 'db')
 
+    # Debugging: This will show you exactly where it's looking in the logs
+    print(f"DEBUG: Searching for vector store at: {vector_store_path}")
+    # 2. Add this Check
     if not os.path.exists(vector_store_path):
-        raise FileNotFoundError(f"Vector store not found at {vector_store_path}. Please run ingestion first.")
+        print(f"❌ ERROR: DB folder not found at {vector_store_path}")
+        # List files in root to help you debug in the HF logs
+        print(f"DEBUG: Files in root are: {os.listdir(project_root)}")
+    else:
+        print(f"✅ SUCCESS: DB folder found at {vector_store_path}")
+    if not os.path.exists(vector_store_path):
+        raise FileNotFoundError(f"FAISS index not found at {vector_store_path}. Run ingestion first.")
 
-    embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
-    vector_store = FAISS.load_local(vector_store_path, embeddings, allow_dangerous_deserialization=True)
+    # 2. Setup Embeddings & Retriever
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    vector_store = FAISS.load_local(
+        vector_store_path, 
+        embeddings, 
+        allow_dangerous_deserialization=True
+    )
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
+    # 3. Prompt Template (Optimized for Gemini 2.x/3.x)
+    template = """
+    <system>
+    You are Aditi, a professional AI assistant for Nikhil Chaube. 
+    - Use the provided context to answer questions about Nikhil's resume.
+    - Be detailed and use Markdown for resume questions.
+    - If the answer isn't in the context, say so.
+    - If the answer is sourced from the context, append the special tag `[RESUME]` at the very end of your response.
+    </system>
+
+    <context>
+    {context}
+    </context>
+
+    <question>
+    {question}
+    </question>
+    """
+    
+    prompt = ChatPromptTemplate.from_template(template)
     llm = get_llm(llm_provider, api_key, ollama_model, ollama_base_url)
 
-    template = """
-    You are Aditi, a professional and helpful AI assistant.
-
-    Your primary purpose is to answer questions about Nikhil Chaube's resume using ONLY the provided context.
-    - For resume questions, give a detailed, well-structured answer using Markdown (headings, bullet points).
-    - For all other questions, be brief and concise.
-    - Append '[Resume](https://drive.google.com/file/d/1xw7USgq9j1MDpDDjVbc8xgicROMZYOLx/view?usp=sharing)' to answers sourced from the context.
-    - NEVER invent information. If the context doesn't contain the answer, say so.
-
-    Persona:
-    - Only discuss your own persona ("Aditi") if asked directly.
-    - Tone: Professional, clear, calm, and encouraging. Use simple English and short sentences. Do not over-explain.
-
-    Context: {context}
-    Question: {question}
-    Answer:
-    """
-
-    prompt = ChatPromptTemplate.from_template(template)
-
+    # 4. Chain Architecture
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    rag_chain_from_docs = (
+    # Sequence: Retrieve -> Format -> Prompt -> LLM -> Parse
+    rag_chain = (
         {
-            "context": lambda x: format_docs(x["documents"]),
-            "question": lambda x: x["question"],
+            "context": retriever | format_docs,
+            "question": RunnablePassthrough()
         }
         | prompt
         | llm
         | StrOutputParser()
     )
 
-    rag_chain_with_citation = (
-        {
-            "documents": retriever,
-            "question": RunnablePassthrough(),
-        }
-        | RunnablePassthrough.assign(answer=rag_chain_from_docs)
-        | (lambda x: x['answer']) # Simply return the answer generated by the LLM
-    )
-
-    return rag_chain_with_citation
+    return rag_chain
 
 if __name__ == '__main__':
-    # This is for testing the RAG chain directly
-    rag_chain = get_rag_chain()
-    # result = rag_chain.invoke("What is Nikhil's experience?")
-    # print(result)
-    
-    # Streaming example
-    for chunk in rag_chain.stream("What are nikhil's skills?"):
-        print(chunk, end="", flush=True)
+    try:
+        # Defaults to Gemini unless env MODEL_PROVIDER is changed
+        chain = get_rag_chain()
+        print("Aditi Online. Testing...\n")
+        
+        for chunk in chain.stream("What are Nikhil's main skills?"):
+            print(chunk, end="", flush=True)
+            
+    except Exception as e:
+        print(f"\n[ERROR]: {e}")

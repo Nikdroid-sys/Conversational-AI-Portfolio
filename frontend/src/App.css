@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&display=swap');
 
 html,
@@ -24,7 +25,7 @@ body {
   height: 100%;
   /* Use 100% height for the App container */
   width: 100vw;
-  background: url('./assets/background.jfif') no-repeat center center;
+  background: url('./assets/New\ Project.jpg') no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
   /* Keep background fixed */
@@ -113,6 +114,8 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   white-space: pre-wrap;
   word-break: break-word;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
 }
 
 .chat-message.user {
@@ -129,7 +132,7 @@ body {
   align-self: flex-start;
   text-align: left;
   color: #FFFFFF;
-  text-shadow: none;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .bot-message-content h1,
@@ -363,12 +366,10 @@ body {
   background: rgba(211, 75, 75, 0.35);
   border: 1px solid rgba(211, 75, 75, 0.4);
   color: #FFFFFF;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
-.bot-message-content {
-  /* No longer a flex container to allow natural text flow */
-}
+
 
 .error-icon {
   width: 1.2rem;
@@ -396,22 +397,176 @@ body {
 
 
 
+
+
+
+
 /* Responsive adjustments for mobile devices */
+
+
+
+
+
+
 
 @media (max-width: 768px) {
 
+
+
+
+
+
+
   .chat-container {
+
+
+
+
+
+
 
     width: 95%;
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   .input-bar {
 
+
+
+
+
+
+
     width: 90%;
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+.home-icon-container {
+
+
+
+  position: absolute;
+
+
+
+  top: 1rem;
+
+
+
+  left: 1rem;
+
+
+
+  z-index: 100;
+
+
+
+  cursor: pointer;
+
+
+
+}
+
+
+
+
+
+
+
+.home-icon-container img {
+
+
+
+
+
+
+
+  width: 40px;
+
+
+
+
+
+
+
+  height: 40px;
+
+
+
+
+
+
+
+  transition: transform 0.3s ease;
+
+
+
+
+
+
+
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.8));
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+.home-icon-container img:hover {
+
+
+
+  transform: scale(1.1);
+
+
 
 }

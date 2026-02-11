@@ -29,7 +29,8 @@
   /* transform: translateY(-2px); /* Subtle lift effect */
 }
 
-.icon svg {
+.icon svg,
+.icon .icon-svg {
   width: 20px; /* Smaller icon size within the button */
   height: 20px;
   fill: currentColor; /* Ensure SVG color matches text */

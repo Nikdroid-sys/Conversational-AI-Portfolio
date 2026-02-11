@@ -26,11 +26,10 @@ async def startup_event():
 
 
 # CORS (Cross-Origin Resource Sharing)
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:5173",  # Vite default port
-]
+allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+
+# Split the string by commas to create a list
+origins = [origin.strip() for origin in allowed_origins_raw.split(",")]
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,6 +55,7 @@ def read_root():
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    print(f"Received request: {request.dict()}")
     try:
         rag_chain = get_rag_chain(
             llm_provider=request.llm_provider,
@@ -69,5 +69,7 @@ async def chat(request: ChatRequest):
 
 
 if __name__ == "__main__":
+    # Get port from environment (HF sets this automatically) or default to 8000 for local
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 7860)) 
+    uvicorn.run(app, host="0.0.0.0", port=port)

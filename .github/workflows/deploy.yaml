@@ -2,20 +2,27 @@ name: Deploy Frontend to GH Pages
 
 on:
   push:
-    branches: [ main ] # Or 'master'
+    branches: [ main ]
     paths:
-      - 'frontend/**' # Only run when frontend files change
+      - 'frontend/**'
 
+# Permissions required for modern GitHub Actions deployment
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent multiple deployments from running at the same time
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,11 +40,22 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # This injects your secret into the Vite build
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # Modern Step 1: Upload the "dist" folder as an artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
+          path: ./frontend/dist
+
+  deploy:
+    # Modern Step 2: Deploy that artifact directly to the web
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -129,7 +129,6 @@ function App() {
     } catch (error) {
       console.error('Error fetching chat response:', error);
       setIsTyping(false);
-      setCitation(''); // Clear citation on error (if any partial streaming happened)
 
       let userFacingErrorMessage;
 

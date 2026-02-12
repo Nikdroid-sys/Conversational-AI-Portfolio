@@ -32,7 +32,7 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
     Returns the configured LLM instance with 2026-stable model versions.
     """
     model_provider = llm_provider or os.getenv("MODEL_PROVIDER", "gemini").lower()
-    
+    gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
     try:
         if model_provider == "gemini":
             gemini_api_key = api_key or os.getenv("GEMINI_API_KEY")
@@ -42,10 +42,8 @@ def get_llm(llm_provider=None, api_key=None, ollama_model=None, ollama_base_url=
             # FIX: Using gemini-2.5-flash to avoid the 404 error in Feb 2026
             # We force version='v1' to ensure it uses the stable production endpoint
             return ChatGoogleGenerativeAI(
-                model="Gemini 2.5 Flash-Lite", 
+                model=gemini_model, 
                 google_api_key=gemini_api_key,
-                # Move version here to stop the warning
-                model_kwargs={"version": "v1"},
                 temperature=0.3
             )
         
@@ -78,33 +76,27 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     """
     Creates the complete RAG chain with Aditi persona and vector retrieval.
     """
-    # # 1. Path & Resource Setup
-    # # Determine the project root dynamically
-    # current_dir = os.path.dirname(os.path.abspath(__file__))
-    # project_root = os.path.join(current_dir, '..', '..', '..')
-    # vector_store_path = os.path.join(project_root, 'db')
-    # 1. Get the directory where rag.py is located
+    # 1. Path & Resource Setup (Optimized for Local & Hugging Face)
     current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Moves up from backend/app/core to backend/
+    project_root = os.path.abspath(os.path.join(current_dir, "../../")) 
 
-    # 2. Find the project root by looking for the 'backend' folder
-    # This works as long as 'db' and 'backend' are in the same parent folder
-    project_root = os.path.abspath(os.path.join(current_dir, "../../../")) 
-
-    # 3. Join with 'db'
+    # Define absolute paths for both resources
     vector_store_path = os.path.join(project_root, 'db')
+    data_path = os.path.join(project_root, 'data')
 
-    # Debugging: This will show you exactly where it's looking in the logs
+    # Debugging logs
     print(f"DEBUG: Searching for vector store at: {vector_store_path}")
-    # 2. Add this Check
+    
+    # 2. Path Validation
     if not os.path.exists(vector_store_path):
         print(f"❌ ERROR: DB folder not found at {vector_store_path}")
-        # List files in root to help you debug in the HF logs
-        print(f"DEBUG: Files in root are: {os.listdir(project_root)}")
+        if os.path.exists(project_root):
+            print(f"DEBUG: Files in project root ({project_root}) are: {os.listdir(project_root)}")
+        raise FileNotFoundError(f"FAISS index not found at {vector_store_path}. Run ingestion first.")
     else:
         print(f"✅ SUCCESS: DB folder found at {vector_store_path}")
-    if not os.path.exists(vector_store_path):
-        raise FileNotFoundError(f"FAISS index not found at {vector_store_path}. Run ingestion first.")
-
     # 2. Setup Embeddings & Retriever
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vector_store = FAISS.load_local(

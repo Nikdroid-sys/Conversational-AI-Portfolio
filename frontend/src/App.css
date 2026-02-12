@@ -25,7 +25,6 @@ body {
   height: 100%;
   /* Use 100% height for the App container */
   width: 100vw;
-  background: url('./assets/New\ Project.jpg') no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
   /* Keep background fixed */
@@ -349,16 +348,16 @@ body {
 
 /* Styling for chat message links (citations) */
 .chat-message.bot .citation-link {
-  color: inherit;
-  text-decoration: none;
+  color: #8ab4f8; /* A light blue color */
+  text-decoration: underline;
   font-weight: 500;
-  opacity: 0.9;
+  opacity: 1;
   cursor: pointer;
 }
 
 .chat-message.bot .citation-link:hover {
   text-decoration: underline;
-  opacity: 1;
+  opacity: 0.9;
 }
 
 /* New styles for error messages as bot messages */

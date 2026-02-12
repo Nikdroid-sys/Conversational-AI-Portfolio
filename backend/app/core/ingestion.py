@@ -12,7 +12,7 @@ load_dotenv()
 
 def get_project_root():
     """Returns the project root directory."""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 def get_vector_store_path():
     """Returns the path to the vector store."""

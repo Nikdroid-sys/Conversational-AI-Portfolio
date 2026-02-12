@@ -281,8 +281,19 @@ function App() {
 
 
 
+  const backgroundImageUrl = `${import.meta.env.BASE_URL}${import.meta.env.VITE_BACKGROUND_IMAGE_NAME}`;
+
   return (
-    <div className="App">
+    <div
+      className="App"
+      style={{
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <div className="home-icon-container" onClick={handleHomeClick} title="Click to Home">
         <HomeIcon />
       </div>

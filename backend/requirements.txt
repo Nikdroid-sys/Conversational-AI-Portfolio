@@ -20,3 +20,6 @@ faiss-cpu
 # Other
 requests
 google-genai
+
+unstructured
+markdown

@@ -281,8 +281,15 @@ function App() {
 
 
 
-  const backgroundImageUrl = `${import.meta.env.BASE_URL}${import.meta.env.VITE_BACKGROUND_IMAGE_NAME}`;
+  //const backgroundImageUrl = `${import.meta.env.BASE_URL}${import.meta.env.VITE_BACKGROUND_IMAGE_NAME}`;
+  // 1. Sanitize the base path (remove trailing slash)
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+  // 2. Sanitize the file name (remove leading slash)
+  const fileName = (import.meta.env.VITE_BACKGROUND_IMAGE_NAME || "").replace(/^\//, "");
+
+  // 3. Combine them safely
+  const backgroundImageUrl = `${base}/${fileName}`;
   return (
     <div
       className="App"

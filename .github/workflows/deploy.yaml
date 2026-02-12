@@ -41,6 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_BACKGROUND_IMAGE_NAME: ${{ vars.VITE_BACKGROUND_IMAGE_NAME }}
 
       # Modern Step 1: Upload the "dist" folder as an artifact
       - name: Upload artifact

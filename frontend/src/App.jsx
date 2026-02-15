@@ -12,6 +12,8 @@ import SettingsIcon from './components/SettingsIcon';
 import AboutIcon from './components/AboutIcon';
 import ErrorIcon from './components/ErrorIcon';
 import HomeIcon from './components/HomeIcon';
+import ContactModal from './components/ContactModal';
+import UAParser from 'ua-parser-js';
 
 // Define a custom renderer for links
 //Deployment trigger
@@ -44,15 +46,62 @@ function App() {
 
   const [showAbout, setShowAbout] = useState(false);
 
+    const [showContactModal, setShowContactModal] = useState(false);
+
+    const [contactModalShown, setContactModalShown] = useState(false);
+
+    const [pendingLog, setPendingLog] = useState(null);
+
+    const [contactInfo, setContactInfo] = useState(null);
+
   const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [openaiApiKey, setOpenaiApiKey] = useState('');
   const [ollamaUrl, setOllamaUrl] = useState('');
   const [ollamaModel, setOllamaModel] = useState('');
   const [llmProvider, setLlmProvider] = useState('gemini');
+  const [geminiModel, setGeminiModel] = useState('gemini-2.5-flash-lite');
+  const [latency, setLatency] = useState(0);
+  const [sessionId, setSessionId] = useState('');
+
+  const handleContactSubmit = (contactData) => {
+    setContactInfo(contactData);
+    setShowContactModal(false);
+    if (pendingLog) {
+      sendDataToGoogleSheet(pendingLog.question, pendingLog.answer, pendingLog.latency, contactData);
+      setPendingLog(null);
+    }
+    // We can optionally send the data again here, but it's better to wait for the next message
+  };
+
+  const handleContactModalClose = () => {
+    setShowContactModal(false);
+    if (pendingLog) {
+      sendDataToGoogleSheet(pendingLog.question, pendingLog.answer, pendingLog.latency);
+      setPendingLog(null);
+    }
+  };
+
   const handleSend = async () => {
     if (input.trim() === '') return;
 
-    const userMessage = { text: input, sender: 'user' };
+    if (pendingLog) {
+      sendDataToGoogleSheet(pendingLog.question, pendingLog.answer, pendingLog.latency);
+      setPendingLog(null);
+    }
+
+    const isFirstMessage = messages.length === 0;
+
+    if (isFirstMessage && !contactModalShown) {
+      setShowContactModal(true);
+      setContactModalShown(true);
+    }
+
+    proceedWithApiCall(input, isFirstMessage);
+    setInput('');
+  };
+
+  const proceedWithApiCall = async (question, isFirstMessage) => {
+    if (question.trim() === '') return;
+    const userMessage = { text: question, sender: 'user' };
     let botMessageIndex;
     // Optimistically add user's message and a placeholder for bot's message
     setMessages(prevMessages => {
@@ -62,22 +111,22 @@ function App() {
       return newMessagesArray;
     });
 
-    setInput('');
     // setIsTyping is no longer the primary driver of the "typing" message, but we can keep it for other potential uses.
     setIsTyping(true);
     let requestBody = {
-      query: input,
+      query: question,
       llm_provider: llmProvider,
     };
 
     if (llmProvider === 'gemini') {
       requestBody.api_key = geminiApiKey;
-    } else if (llmProvider === 'openai') {
-      requestBody.api_key = openaiApiKey;
+      requestBody.llm_model = geminiModel;
     } else if (llmProvider === 'ollama') {
       requestBody.ollama_base_url = ollamaUrl;
       requestBody.ollama_model = ollamaModel;
     }
+
+    const startTime = Date.now();
 
     try {
       // Use the environment variable injected by GitHub Actions, 
@@ -109,6 +158,10 @@ function App() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
+          const endTime = Date.now();
+          const latencyInSeconds = (endTime - startTime) / 1000;
+          setLatency(latencyInSeconds);
+
           setMessages(prev => {
             const newMessages = [...prev];
             if (newMessages[botMessageIndex]) {
@@ -118,6 +171,12 @@ function App() {
           });
 
           setFullBotMessage(accumulatedBotMessage);
+          if (isFirstMessage) {
+            setPendingLog({ question, answer: accumulatedBotMessage, latency: latencyInSeconds });
+          } else {
+            sendDataToGoogleSheet(question, accumulatedBotMessage, latencyInSeconds);
+          }
+
 
           setIsTyping(false);
           setCurrentMessageIndex(-1);
@@ -164,17 +223,53 @@ function App() {
     }
   };
 
+  const sendDataToGoogleSheet = async (question, answer, latency, submittedContactInfo) => {
+    const parser = new UAParser();
+    const result = parser.getResult();
+    const device = result.device.type || 'desktop';
+    const browser = result.browser.name;
+    const finalContactInfo = submittedContactInfo || contactInfo;
+
+    const data = {
+      timestamp: new Date().toISOString(),
+      sessionId,
+      name: finalContactInfo?.name || '',
+      llmModel: llmProvider === 'gemini' ? geminiModel : ollamaModel,
+      apiKey: llmProvider === 'gemini' ? geminiApiKey : '',
+      geminiQuestion: question,
+      geminiAnswer: answer,
+      device,
+      browser,
+      latency: latency.toFixed(2),
+      contact: finalContactInfo?.contact || '',
+    };
+
+    try {
+      // IMPORTANT: Replace with your actual Google Apps Script Web App URL
+      const sheetUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+
+      await fetch(sheetUrl, {
+        method: 'POST',
+        mode: 'no-cors', // Important for sending to Google Apps Script from a different origin
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('Error sending data to Google Sheet:', error);
+    }
+  };
+
 
   const handleHomeClick = () => {
     setMessages([]);
   };
 
+
   const handleCloseSettings = () => {
     const savedGeminiApiKey = localStorage.getItem('geminiApiKey') || '';
     setGeminiApiKey(savedGeminiApiKey);
-
-    const savedOpenaiApiKey = localStorage.getItem('openaiApiKey') || '';
-    setOpenaiApiKey(savedOpenaiApiKey);
 
     const savedOllamaUrl = localStorage.getItem('ollamaUrl') || '';
     setOllamaUrl(savedOllamaUrl);
@@ -185,42 +280,45 @@ function App() {
     const savedLlmProvider = localStorage.getItem('llmProvider') || 'gemini';
     setLlmProvider(savedLlmProvider);
 
+    const savedGeminiModel = localStorage.getItem('geminiModel') || 'gemini-2.5-flash-lite';
+    setGeminiModel(savedGeminiModel);
+
     setShowSettings(false);
   };
 
   const handleSaveSettings = () => {
     localStorage.setItem('geminiApiKey', geminiApiKey);
-    localStorage.setItem('openaiApiKey', openaiApiKey);
     localStorage.setItem('ollamaUrl', ollamaUrl);
     localStorage.setItem('ollamaModel', ollamaModel);
     localStorage.setItem('llmProvider', llmProvider);
+    localStorage.setItem('geminiModel', geminiModel);
     setShowSettings(false);
   };
 
   const handleResetSettings = () => {
     localStorage.removeItem('geminiApiKey');
-    localStorage.removeItem('openaiApiKey');
     localStorage.removeItem('ollamaUrl');
     localStorage.removeItem('ollamaModel');
     localStorage.removeItem('llmProvider');
+    localStorage.removeItem('geminiModel');
 
     setGeminiApiKey('');
-    setOpenaiApiKey('');
     setOllamaUrl('');
     setOllamaModel('');
     setLlmProvider('gemini'); // Reset to default provider
+    setGeminiModel('gemini-2.5-flash-lite');
 
     setShowSettings(false);
   };
 
   useEffect(() => {
+    setSessionId('session-' + Date.now());
+  }, []);
+
+  useEffect(() => {
     const savedGeminiApiKey = localStorage.getItem('geminiApiKey');
     if (savedGeminiApiKey) {
       setGeminiApiKey(savedGeminiApiKey);
-    }
-    const savedOpenaiApiKey = localStorage.getItem('openaiApiKey');
-    if (savedOpenaiApiKey) {
-      setOpenaiApiKey(savedOpenaiApiKey);
     }
     const savedOllamaUrl = localStorage.getItem('ollamaUrl');
     if (savedOllamaUrl) {
@@ -233,6 +331,10 @@ function App() {
     const savedLlmProvider = localStorage.getItem('llmProvider');
     if (savedLlmProvider) {
       setLlmProvider(savedLlmProvider);
+    }
+    const savedGeminiModel = localStorage.getItem('geminiModel');
+    if (savedGeminiModel) {
+      setGeminiModel(savedGeminiModel);
     }
   }, []);
 
@@ -362,7 +464,6 @@ function App() {
           <label>LLM Provider</label>
           <select value={llmProvider} onChange={(e) => setLlmProvider(e.target.value)}>
             <option value="gemini">Gemini</option>
-            <option value="openai">OpenAI</option>
             <option value="ollama">Ollama</option>
           </select>
 
@@ -375,17 +476,12 @@ function App() {
                 onChange={(e) => setGeminiApiKey(e.target.value)}
                 placeholder="Your Gemini API Key (e.g., AIza...)"
               />
-            </>
-          )}
-
-          {llmProvider === 'openai' && (
-            <>
-              <label>OpenAI API Key</label>
+              <label>Gemini Model</label>
               <input
                 type="text"
-                value={openaiApiKey}
-                onChange={(e) => setOpenaiApiKey(e.target.value)}
-                placeholder="Your OpenAI API Key (e.g., sk-...)"
+                value={geminiModel}
+                onChange={(e) => setGeminiModel(e.target.value)}
+                placeholder="gemini-2.5-flash-lite"
               />
             </>
           )}
@@ -429,6 +525,12 @@ function App() {
           </a>
         </div>
       </Modal>
+
+      <ContactModal
+        show={showContactModal}
+        onClose={handleContactModalClose}
+        onSubmit={handleContactSubmit}
+      />
 
     </div>
   );

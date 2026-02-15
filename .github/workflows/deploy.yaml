@@ -42,6 +42,7 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_BACKGROUND_IMAGE_NAME: ${{ vars.VITE_BACKGROUND_IMAGE_NAME }}
+          VITE_GOOGLE_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_SCRIPT_URL }}
 
       # Modern Step 1: Upload the "dist" folder as an artifact
       - name: Upload artifact

@@ -381,6 +381,43 @@ function App() {
     }
   }, [fullBotMessage]);
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (pendingLog) {
+        const sheetUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+        if (sheetUrl) {
+          const parser = new UAParser();
+          const result = parser.getResult();
+          const device = result.device.type || 'desktop';
+          const browser = result.browser.name;
+
+          const data = {
+            timestamp: new Date().toISOString(),
+            sessionId,
+            name: contactInfo?.name || '',
+            llmModel: llmProvider === 'gemini' ? geminiModel : ollamaModel,
+            apiKey: llmProvider === 'gemini' ? geminiApiKey : '',
+            geminiQuestion: pendingLog.question,
+            geminiAnswer: pendingLog.answer,
+            device,
+            browser,
+            latency: pendingLog.latency.toFixed(2),
+            contact: contactInfo?.contact || '',
+          };
+
+          const blob = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=UTF-8' });
+          navigator.sendBeacon(sheetUrl, blob);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [pendingLog, sessionId, contactInfo, llmProvider, geminiModel, ollamaModel, geminiApiKey]);
+
 
 
   //const backgroundImageUrl = `${import.meta.env.BASE_URL}${import.meta.env.VITE_BACKGROUND_IMAGE_NAME}`;

@@ -20,6 +20,10 @@ import google.genai.errors as google_errors
 from openai import APIError as OpenAIError
 from requests.exceptions import ConnectionError as OllamaConnectionError
 
+from app.core.datetime_tool import get_current_datetime
+from app.core.web_search_tool import web_search
+from langchain_core.runnables import RunnableLambda
+
 # Load environment variables
 load_dotenv()
 
@@ -106,22 +110,33 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     )
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    def format_search_results(results):
+        if not results:
+            return "No results found."
+        return "\n\n".join(f"Title: {r.get('title', 'N/A')}\nBody: {r.get('body', 'N/A')}" for r in results)
+
     # 3. Prompt Template (Optimized for Gemini 2.x/3.x)
-    template = """
+    current_time = get_current_datetime()
+    template = f"""
     <system>
     You are Aditi, a professional AI assistant for Nikhil Chaube. 
-    - Use the provided context to answer questions about Nikhil's resume.
+    - The current date and time is {current_time}. You can use this to answer questions about the present.
+    - Use the provided context to answer questions about Nikhil's resume or from a web search.
     - Be detailed and use Markdown for resume questions.
     - If the answer isn't in the context, say so.
     - If the answer is sourced from the context, append the special tag `[RESUME]` at the very end of your response.
+    - If the answer is from a web search, append the special tag `[WEB]` at the very end of your response.
     </system>
 
     <context>
-    {context}
+    {{context}}
     </context>
 
     <question>
-    {question}
+    {{question}}
     </question>
     """
     
@@ -129,15 +144,22 @@ def get_rag_chain(llm_provider=None, api_key=None, ollama_model=None, ollama_bas
     llm = get_llm(llm_provider, api_key, ollama_model, ollama_base_url)
 
     # 4. Chain Architecture
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
+    retriever_chain = RunnableLambda(lambda x: x['question']) | retriever | format_docs
+    
+    search_chain = (
+        RunnableLambda(lambda x: web_search(x['question'])) 
+        | format_search_results
+    )
 
-    # Sequence: Retrieve -> Format -> Prompt -> LLM -> Parse
+    def route(info):
+        if "search" in info["question"].lower():
+            return search_chain
+        else:
+            return retriever_chain
+
     rag_chain = (
-        {
-            "context": retriever | format_docs,
-            "question": RunnablePassthrough()
-        }
+        {"question": RunnablePassthrough()}
+        | RunnableLambda(lambda x: {"context": route(x).invoke(x), "question": x["question"]})
         | prompt
         | llm
         | StrOutputParser()

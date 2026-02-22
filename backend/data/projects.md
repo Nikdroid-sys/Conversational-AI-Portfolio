@@ -6,8 +6,54 @@
 > Client names, internal systems, and proprietary details are intentionally omitted.
 
 ### Project 1: No-Code Multi-Agent AI Orchestration Platform
+Project: Self-Correcting Agentic RAG (Reasoning Engine)
+Role: GenAI Engineer
+
+Timeline: 2024–2025
+
+Nature: Advanced RAG Implementation for High-Precision Domains
+
+Description:
+
+Developed an "Agentic RAG" system designed to eliminate hallucinations by implementing a self-healing reasoning loop. Unlike traditional linear RAG, this system autonomously evaluates the quality of its own retrieved data and re-searches if the initial results are irrelevant or hallucinated.
+
+Key Contributions:
+
+Architected Multi-Agent Loops: Leveraged LangGraph to create a stateful cyclic graph where a 'Grader' node assesses document relevance. If the score falls below a threshold, the system triggers a 'Query Rewrite' agent to refine the search terms and retry the retrieval.
+
+Visual-to-Production Workflow: Used Langflow as a visual IDE to map complex logic gates and edge cases (e.g., "What if the vector DB returns nothing?"). Exported the logic as a JSON schema to be served via a "headless" FastAPI backend for enterprise stability.
+
+Hallucination Guardrails: Integrated a 'Hallucination Grader' that performs a factual consistency check between the retrieved context and the final generation, ensuring the AI never "imagines" facts not present in the source documents.
+
+Hybrid Retrieval Optimization: Combined semantic vector search with keyword-based retrieval, using Cross-Encoders for re-ranking to ensure the most contextually dense information reached the LLM.
+
+Performance Monitoring: Integrated LangSmith for deep-trace observability, allowing for visual debugging of every "turn" the agent took during the self-correction process.
+
+Technologies:
+
+Orchestration: LangGraph, Langflow, Python
+
+API Framework: FastAPI
+
+Vector DB:  Azure AI Search
+
+Models: Azure OpenAI (GPT-4o), LangChain
+
+Observability: LangSmith
+
+Impact:
+
+Reduced Hallucinations by ~30% compared to standard RAG pipelines by implementing autonomous self-grading.
+
+Increased Retrieval Recall: The 'Query Rewrite' loop successfully answered 20% of complex queries that initially failed on the first search attempt.
+
+Production Readiness: Decoupled the design (Langflow) from execution (FastAPI), allowing for 99.9% uptime and version-controlled logic deployments.
+
+
+
+
 Role: GenAI Engineer  
-Timeline: 2023–2024  
+Timeline: 2025–2026  
 Nature: Internal enterprise platform
 
 Description:

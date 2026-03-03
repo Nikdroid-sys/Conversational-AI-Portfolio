@@ -4,203 +4,138 @@
 
 > The following projects were developed during my role at Tata Consultancy Services.
 > Client names, internal systems, and proprietary details are intentionally omitted.
+---
 
-### Project 1: No-Code Multi-Agent AI Orchestration Platform
-Project: Self-Correcting Agentic RAG (Reasoning Engine)
-Role: GenAI Engineer
+## 🏢 Professional Experience: Tata Consultancy Services (TCS)
 
-Timeline: 2024–2025
+### Senior GenAI Systems Engineer | Sept 2022 – Present
 
-Nature: Advanced RAG Implementation for High-Precision Domains
+#### Core Platform: "AI Axis" – Enterprise Multi-Agent Orchestration Layer
 
-Description:
+Nature: Internal Strategic Initiative | Lead Backend Engineer
 
-Developed an "Agentic RAG" system designed to eliminate hallucinations by implementing a self-healing reasoning loop. Unlike traditional linear RAG, this system autonomously evaluates the quality of its own retrieved data and re-searches if the initial results are irrelevant or hallucinated.
-
-Key Contributions:
-
-Architected Multi-Agent Loops: Leveraged LangGraph to create a stateful cyclic graph where a 'Grader' node assesses document relevance. If the score falls below a threshold, the system triggers a 'Query Rewrite' agent to refine the search terms and retry the retrieval.
-
-Visual-to-Production Workflow: Used Langflow as a visual IDE to map complex logic gates and edge cases (e.g., "What if the vector DB returns nothing?"). Exported the logic as a JSON schema to be served via a "headless" FastAPI backend for enterprise stability.
-
-Hallucination Guardrails: Integrated a 'Hallucination Grader' that performs a factual consistency check between the retrieved context and the final generation, ensuring the AI never "imagines" facts not present in the source documents.
-
-Hybrid Retrieval Optimization: Combined semantic vector search with keyword-based retrieval, using Cross-Encoders for re-ranking to ensure the most contextually dense information reached the LLM.
-
-Performance Monitoring: Integrated LangSmith for deep-trace observability, allowing for visual debugging of every "turn" the agent took during the self-correction process.
-
-Technologies:
-
-Orchestration: LangGraph, Langflow, Python
-
-API Framework: FastAPI
-
-Vector DB:  Azure AI Search
-
-Models: Azure OpenAI (GPT-4o), LangChain
-
-Observability: LangSmith
-
-Impact:
-
-Reduced Hallucinations by ~30% compared to standard RAG pipelines by implementing autonomous self-grading.
-
-Increased Retrieval Recall: The 'Query Rewrite' loop successfully answered 20% of complex queries that initially failed on the first search attempt.
-
-Production Readiness: Decoupled the design (Langflow) from execution (FastAPI), allowing for 99.9% uptime and version-controlled logic deployments.
+* The Problem: Inconsistent AI deployments and "Shadow AI" across 3+ business units.
+* The Solution: Architected a standardized FastAPI Microservices Platform to manage the full lifecycle of agentic systems (Creation, Registry, Execution, and Monitoring).
+* Strategic Impact: * 80% Reduction in Onboarding: Standardized agent templates (Escalation, Branching, HITL) allowed non-technical teams to deploy workflows without low-level coding.
+* Governance at Scale: Integrated FastMCP 3.0 and NeMo Guardrails into the core middleware, ensuring every agentic call adhered to enterprise PII and safety policies.
+* Inference Efficiency: Orchestrated a Semantic Caching Layer (GPTCache), reducing redundant API costs by 30% and improving response latency for common enterprise queries.
 
 
-
-
-Role: GenAI Engineer  
-Timeline: 2025–2026  
-Nature: Internal enterprise platform
-
-Description:
-- Built a backend platform to dynamically create and orchestrate multi-agent AI systems.
-- Enabled non-technical users to configure agent workflows without writing code.
-
-Key Contributions:
-- Designed FastAPI microservices to manage agent lifecycle and execution.
-- Implemented prompt-driven agent templates supporting escalation, HITL, and branching logic.
-- Integrated LangGraph, AutoGen, and similar frameworks for agent orchestration.
-- Built a dynamic script ingestion system for Python-based agents.
-- Reduced agent onboarding and setup time by ~80%.
-
-Technologies:
-FastAPI, LangGraph, AutoGen, Python, Azure OpenAI
 
 ---
 
-### Project 2: LLM Strategy Evaluation & Benchmarking Framework
-Role: GenAI Engineer  
-Timeline: 2024–2025  
-Nature: Enterprise benchmarking suite
+#### Flagship System: "Self-Healing" Agentic RAG (Reasoning Engine)
 
-Description:
-- Developed a framework to evaluate when to use prompting, RAG, or fine-tuning for enterprise GenAI use cases.
+Nature: High-Precision Implementation for BFSI/Regulated Domains
 
-Key Contributions:
-- Benchmarked prompting, RAG, and fine-tuning across 12 BFSI and support tasks.
-- Built evaluator agents to assess output quality and hallucination risk.
-- Designed reusable prompt templates using CoT, ReAct, and graph-based reasoning.
-- Reduced hallucinations by ~15% through strategy selection and evaluation.
+* The Problem: Standard RAG pipelines suffered from a 30% hallucination rate due to poor retrieval quality.
+* The Solution: Engineered a Stateful Cyclic Graph (LangGraph) featuring a "Reflexion Pattern."
+* Autonomous Grader Node: Implemented a logic gate that scores retrieved context; if relevance falls below a threshold, a 'Query Rewrite' agent is triggered to autonomously refine the search and retry.
+* Fact-Consistency Loop: Built a 'Hallucination Grader' that performs a cross-check between the generated answer and the source citations before the user sees the output.
 
-Technologies:
-Azure OpenAI, Python, FastAPI, Prompt Engineering
+
+* Performance Metrics: * Recall Optimization: Successfully resolved 20% of complex queries that initially failed on first-pass retrieval.
+* Production Stability: Decoupled design (Langflow) from execution (FastAPI), achieving 99.9% uptime for mission-critical judicial and financial data retrieval.
+
+
 
 ---
 
-### Project 3: Secure RAG Architecture for Regulated Domains
-Role: GenAI Engineer  
-Timeline: 2024–2025  
-Nature: Compliance-focused GenAI system
+#### Framework: LLM Strategy & Benchmarking Suite
 
-Description:
-- Designed a secure, audit-ready RAG architecture for regulated industries.
+Role: Lead Evaluator / GenAI Strategist
 
-Key Contributions:
-- Built RAG pipelines with grounding, traceability, and observability.
-- Integrated FastAPI with LlamaIndex and Azure Blob Storage.
-- Implemented encryption, audit logging, and HITL workflows.
-- Ensured document-level traceability for responsible AI usage.
+* Objective: Developed a data-driven framework to determine the optimal balance between Prompt Engineering, RAG, and Fine-Tuning (PEFT).
+* Key Contributions:
+* Automated Evaluation: Built a fleet of Evaluator Agents to benchmark model performance across 12 distinct BFSI support tasks.
+* Technique Selection: Proved that ReAct (Reasoning + Acting) and Chain-of-Thought (CoT) prompting reduced hallucinations by ~15% for high-stakes decision-making workflows.
+* Security Architecture: Designed an audit-ready RAG pipeline integrating Azure Blob Storage with LlamaIndex, ensuring document-level traceability and encrypted logging for compliance.
 
-Technologies:
-FastAPI, LlamaIndex, Azure Blob, Azure OpenAI
+
 
 ---
 
-### Project 4: Enterprise RAG Chatbot on Microsoft Teams
-Role: AI Developer  
-Timeline: 2023
 
-Description:
-- Developed a real-time chatbot to answer internal enterprise queries via Microsoft Teams.
+## Personal Projects Portfolio (Public)
 
-Key Contributions:
-- Implemented document chunking and retrieval using LlamaIndex and Qdrant.
-- Used Azure OpenAI for response generation.
-- Reduced manual ticket volume by ~40%.
-- Improved UAT query resolution by ~60%.
-- Tuned retrieval for multilingual enterprise data.
+## 1. Project: Agentic-Data-Factory (Lead Architect)
 
-Technologies:
-LlamaIndex, Qdrant, Azure OpenAI, Microsoft Teams
+Nature: Production-Grade Synthetic Data Engineering Pipeline
+
+Role: Senior AI Systems Architect
+
+Core Stack: LangGraph, FastMCP 3.0, FastAPI, uv, NeMo Guardrails, Arize Phoenix, DeepEval
+
+### 🏗️ Architectural Vision
+
+Developed a decoupled, three-tier autonomous pipeline to solve the "Cold Start" problem in LLM fine-tuning. This system transitions enterprise data from "Unstructured Noise" to "Fine-Tuning Ready" `JSONL` assets without manual human labeling.
+
+### 💡 Key Engineering Milestones:
+
+* Stateful Multi-Agent Orchestration: Designed a Reflexion Architecture using LangGraph where a *Synthesizer Agent* generates QA pairs and an *Auditor Agent* performs a factual consistency check. If the "Faithfulness" score (calculated via DeepEval) is $<0.85$, the state triggers a recursive self-correction loop.
+* Resource Abstraction (MCP): Implemented FastMCP 3.0 to create a "Cloud-Agnostic Resource Layer," allowing the agents to seamlessly toggle between local file systems, S3, and Azure Blob storage using standardized tool-calling.
+* Enterprise Governance: Integrated NeMo Guardrails as a deterministic security layer. Every synthetic record is scrubbed for PII (Names, IPs, SSNs) and filtered for topical relevance before reaching the final training set.
+* Observability & Traceability: Leveraged Arize Phoenix (OpenTelemetry) to monitor "Agent Thought-Chains." This allowed for a 20% reduction in tool-call latency by identifying and pruning redundant reasoning steps.
 
 ---
 
-## Personal Projects (Public)
+## 2. Project: Guardian-MCP (Security-First AI Governance)
 
-### Conversational AI Portfolio Platform
-Nature: Personal project
+Nature: Zero-Trust Tool-Calling & Security Gateway
 
-Description:
-- Built a ChatGPT-style conversational interface to answer questions about my profile and work.
+Role: Lead Security Researcher / GenAI Engineer
 
-Key Contributions:
-- Implemented a RAG-backed FastAPI service with conversational memory.
-- Designed grounded responses using structured project and resume context.
-- Built a lightweight React UI with streaming responses.
+Core Stack: FastMCP 3.0, Google OSV API, uv, Python
 
-Technologies:
-LangChain, FastAPI, React
+### 🛡️ System Overview
 
+Engineered a security-critical "Interceptor Pattern" for autonomous agents to eliminate "Agent Liability" (the risk of an LLM installing vulnerable or malicious code during a task).
 
-### Project: Local Multilingual Legal AI System (India)
+### 💡 Key Engineering Milestones:
 
-Nature: Personal Project
+* Real-time Vulnerability Interception: Created a middleware that hooks into `uv pip install` commands. It performs an asynchronous lookup against the Google OSV Database to block packages with active CVEs before they touch the disk.
+* Isolated "Clean Room" Provisioning: Utilized `uv` to create ephemeral, "hidden" virtual environments for agent tasks, ensuring zero pollution of the host system's global Python environment.
+* Self-Healing Patching: If a package is blocked (e.g., *Flask 0.12.1* due to CVE-2018-1000656), the system returns a structured "Security Feedback" to the LLM, prompting it to autonomously research and suggest a patched version (e.g., *Flask 3.1.3*).
 
-Description:
-Developed a privacy-first, CPU-optimized, and locally hosted legal AI system designed specifically for the Indian judicial ecosystem. The system helps advocates and legal researchers by providing grounded, citable legal answers based on ingested legal documents (Acts, Judgments, Constitution, etc.).
+---
 
-Key Contributions:
+## 3. Project: Bharat-Legal AI (Privacy-First Legal RAG)
 
-* Built a Legal RAG (Retrieve, Augment, Generate) pipeline to ensure accurate answers using local legal documents.
-* Implemented Hybrid Search combining traditional keyword search (BM25) with semantic vector search, re-ranked using Reciprocal Rank Fusion (RRF).
-* Designed automatic ingestion of legal documents and efficient indexing for fast startup times.
-* Ensured privacy-by-design, with all data processing running locally on the user’s machine.
-* Optimized system for CPU-only operation, allowing it to run on consumer-grade hardware without needing a dedicated GPU.
+Nature: Local-First, Multilingual Judicial Intelligence System
 
-Technologies:
+Role: Principal Developer
 
-* Backend: FastAPI, LangGraph, Ollama
-* Vector DB: Qdrant
-* Frontend: React, TypeScript, Vite
-* Embeddings: `sentence-transformers/all-MiniLM-L6-v2`
+Core Stack: Ollama (Llama 3.3/Phi-4), Qdrant, LangGraph, sentence-transformers
 
-Impact:
+### ⚖️ Technical Strategy
 
-* Improved efficiency in legal research by automating document ingestion and retrieval.
-* Provided a scalable, privacy-respecting solution for the legal community in India, ensuring secure handling of sensitive data.
+Designed a specialized RAG system for the Indian legal ecosystem, prioritizing zero data-leakage and CPU-only efficiency for local law firms.
 
+### 💡 Key Engineering Milestones:
 
-### Project: Local AI Ops Copilot
+* Hybrid Retrieval Engine: Combined BM25 keyword matching with semantic vector search in Qdrant, utilizing Reciprocal Rank Fusion (RRF) to handle the complex, jargon-heavy terminology of Indian Gazettes.
+* Statute-Level Chunking: Developed a custom document parser for legal PDFs that maintains hierarchical context (Section > Sub-section > Clause), ensuring the LLM cites specific law sections with 90%+ retrieval accuracy.
+* Edge AI Optimization: Quantized the model to 4-bit GGUF using Ollama, enabling full-scale legal reasoning on consumer-grade i5/i7 CPUs with sub-2-second token latency.
 
-Nature: Personal Project
+---
 
-Description:
-Developed a fully local, offline, and CPU-optimized multi-agent AI system for operational debugging. This system analyzes logs, configurations, and internal documentation to generate actionable root-cause analysis and remediation guidance — all without sending any data to the cloud.
+## 4. Project: Local AI Ops Copilot
 
-Key Contributions:
+Nature: Multi-Agent Diagnostics for Air-Gapped Environments
 
-* Built an offline, CPU-only GenAI system focused on operational diagnostics for engineering teams.
-* Designed a multi-agent architecture to separate cognitive responsibilities: Context Analyzer, Knowledge Retriever, and Solution Synthesizer.
-* Integrated a lightweight RAG pipeline using HuggingFace embeddings, FAISS for local vector search, and simple chunking techniques to keep inference efficient.
-* Implemented Human-in-the-loop safety mechanisms, including confidence scoring and risk classification, to ensure that AI suggestions are safe and verifiable.
-* Optimized the entire system to run on consumer-grade hardware (i5-class CPU), with minimal LLM inference per request (around 2 calls).
+Role: AI Ops Specialist
 
-Technologies:
+Core Stack: CrewAI, FAISS, HuggingFace, FastAPI
 
-* LLM Orchestration: CrewAI
-* Local Inference: Ollama
-* Embeddings: HuggingFace sentence-transformers
-* Vector DB: FAISS
-* Backend: FastAPI
-* Language: Python
+### 🛠️ Strategic Implementation
 
-Impact:
+Developed a "Local-First" diagnostic system for engineering teams to perform root-cause analysis (RCA) on logs and internal docs without cloud dependencies.
 
-* Improved incident diagnosis speed and reduced on-call fatigue by automating root-cause analysis and providing actionable remediation steps.
-* Delivered a cloud-free, privacy-first solution that can be deployed in sensitive environments, such as regulated industries or air-gapped systems.
-* Enabled better reuse of internal knowledge without relying on expensive, cloud-dependent observability tools.
+### 💡 Key Engineering Milestones:
+
+* Cognitive Task Separation: Designed a three-agent crew (*Log Analyzer*, *Knowledge Retriever*, *Solution Synthesizer*) to prevent context-window saturation and improve reasoning focus.
+* Safety-First HITL: Implemented a Human-in-the-Loop confidence scoring system. If the AI’s solution has a risk classification of "High," the system freezes execution until a human operator approves the remediation step.
+* Impact: Reduced average incident diagnosis time (MTTR) by ~40% in simulated local environments.
+
+---
 
